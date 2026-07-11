@@ -1,0 +1,50 @@
+[models.'doubao_1_5_ui_tars_250328']
+name = "doubao-1.5-ui-tars-250328"
+base_url = "https://ark.cn-beijing.volces.com/api/v3"
+api_key = ""
+max_action = 100
+max_images = 5
+display_name = "Doubao-1.5-UI-TARS"
+
+[models.'doubao_seed_2_0_lite_260428']
+name = "doubao-seed-2-0-lite-260428"
+base_url = "https://ark.cn-beijing.volces.com/api/v3"
+api_key = ""
+max_action = 100
+max_images = 5
+display_name = "Doubao-Seed-2.0-Lite"
+
+[models.'doubao_seed_2_1_turbo_260628']
+name = "doubao-seed-2-1-turbo-260628"
+base_url = "https://ark.cn-beijing.volces.com/api/v3"
+api_key = ""
+max_action = 100
+max_images = 5
+display_name = "Doubao-Seed-2.1-Turbo"
+
+[models.'doubao_seed_2_1_pro_260628']
+name = "doubao-seed-2-1-pro-260628"
+base_url = "https://ark.cn-beijing.volces.com/api/v3"
+api_key = ""
+max_action = 100
+max_images = 5
+display_name = "Doubao-Seed-2.1-Pro"
+
+[sandbox]
+mcp_server_endpoint = "http://127.0.0.1:38080/sse"
+manager_endpoint = ""
+manager_req_timeout = 10
+tool_server_endpoint_format = "http://{sandbox_primary_ip}:38102"
+
+[planner]
+step_interval = 3
+action_wait_interval = 10
+auth_api_key = ""
+
+[log]
+env = "dev"
+filename = "/var/log/agent-planner.log"
+fmt = "%(asctime)s %(levelname)7s %(filename)s:%(lineno)s - %(name)s - %(message)s"
+backup_count = 5
+max_bytes = 104857600
+datefmt = "%Y-%m-%d %H:%M:%S"

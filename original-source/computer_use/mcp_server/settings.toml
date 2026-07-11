@@ -1,0 +1,22 @@
+[default]
+debug = false
+
+[logging]
+level = "INFO"
+file = "/var/log/computer-use/mcp-server.log"
+max_size = 1024000
+backup_count = 10
+
+[tool_server]
+local = true
+endpoint = "http://127.0.0.1:38102"
+auth_key = ""
+
+[plugins]
+# Set enable_https = true when tool_server is served over HTTPS.
+enable_https = false
+
+[ssl]
+# Absolute path to the CA certificate that signs tool_server's server certificate.
+# Required when plugins.enable_https = true.
+client_ca = ""

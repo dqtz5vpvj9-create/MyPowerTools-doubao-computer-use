@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "toolId": "doubao-computer-use",
+  "sourceClassification": "original-product-subtree",
+  "sourceNote": "The product lives in computer_use under the enclosing Git repository; root security and environment examples are retained.",
+  "capturedAtUtc": "2026-07-11T16:41:57.9744099+00:00",
+  "originalSource": {
+    "sourceRoot": "C:\\Users\\lixinrui\\Documents\\Codex\\2026-07-02\\c-users-lixinrui-downloads-doubao-computer\\work\\doubao-computer-use-local-gh",
+    "gitTopLevel": "C:/Users/lixinrui/Documents/Codex/2026-07-02/c-users-lixinrui-downloads-doubao-computer/work/doubao-computer-use-local-gh",
+    "commit": "be48bb8683e7025f123a751a2fdaae4513321865",
+    "branch": "main",
+    "dirty": true,
+    "status": [
+      " M computer_use/desktop/App.xaml.cs",
+      " D computer_use/desktop/Converters/BooleanToTextConverter.cs",
+      " M computer_use/desktop/Converters/StateBrushConverter.cs",
+      " M computer_use/desktop/MainWindow.xaml",
+      " M computer_use/desktop/Models/ProbeResult.cs",
+      " M computer_use/desktop/Models/ServiceRow.cs",
+      " M computer_use/desktop/Models/ServiceSnapshot.cs",
+      " M computer_use/desktop/README.md",
+      " M computer_use/desktop/Resources/Theme.xaml",
+      " M computer_use/desktop/Services/LocalRuntimeService.cs",
+      " M computer_use/desktop/ViewModels/MainViewModel.cs",
+      "?? computer_use/desktop/Models/RuntimeStartResult.cs"
+    ]
+  },
+  "originalSnapshotPath": "original-source",
+  "selectedEntries": [
+    ".env.example",
+    ".gitignore",
+    "SECURITY.md",
+    "computer_use"
+  ],
+  "copiedFileCount": 104,
+  "missingEntries": [],
+  "currentIntegrationSnapshot": "current-integration",
+  "currentIntegrationGlobs": [
+    "modules/doubao-agent/**",
+    "src/DoubaoAgent.MyPowerTools/**",
+    "src/MyPowerTools.Shell.Avalonia/**/*Doubao*",
+    "src/MyPowerTools.Tests/Doubao*"
+  ],
+  "currentIntegrationMatchedFileCount": 22,
+  "currentIntegrationCopiedFileCount": 22,
+  "currentIntegrationUnmatchedGlobs": [],
+  "currentIntegrationMissingFiles": []
+}

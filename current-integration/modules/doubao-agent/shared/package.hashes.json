@@ -1,0 +1,41 @@
+{
+  "Algorithm": "sha256",
+  "Files": [
+    {
+      "Path": "commands.index.json",
+      "Sha256": "204b7c51c1ee1f9f90792a72422fbe10b686535065d713f0a95e62ec8a7cecbf"
+    },
+    {
+      "Path": "DoubaoAgent.MyPowerTools.dll",
+      "Sha256": "92c36b6112cfb022580d0fa5e1827cd75766847dec84ba40d1d425aca126aea2"
+    },
+    {
+      "Path": "DoubaoAgent.MyPowerTools.pdb",
+      "Sha256": "227b40d42d4fb38629725f4c34ce50f2f711b1e62de1bd8ddd16afa03f47b5c3"
+    },
+    {
+      "Path": "module.json",
+      "Sha256": "bc5b1c8c20d7471147f31e471039db7e212527829fecbdf3b4e48aab1f014661"
+    },
+    {
+      "Path": "ui/dashboard-card.json",
+      "Sha256": "d9754c8c5df3cd550a4e3bcb588221acd3340669680458c646f133565ea66bc1"
+    },
+    {
+      "Path": "ui/detail-page.json",
+      "Sha256": "0c845f8bf18a0d6025162d3c4cb6dc38da2824c319f055bb81d66c9b76faca9a"
+    },
+    {
+      "Path": "ui/logs.json",
+      "Sha256": "d50579e65baf3fba4ba96ae933180920ef22f6b5303fe2e7971b5a0103bf57c9"
+    },
+    {
+      "Path": "ui/settings.json",
+      "Sha256": "76162cc38399f89d9860a68b2a8bfa0b891c76c4db1669ac94747d5707edb972"
+    },
+    {
+      "Path": "ui/tool.json",
+      "Sha256": "a2c81ce521da0ce2234139353cd48141aaff8c550b41d5b07dfc43826054355e"
+    }
+  ]
+}

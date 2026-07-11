@@ -1,0 +1,16 @@
+port = 38102
+display = ":5"
+auth_key = ""
+
+[log]
+env = "dev"
+format = "%(asctime)s %(levelname)7s %(request_id)s %(filename)s:%(lineno)s - %(name)s - %(message)s"
+
+[plugins]
+# Set enable_https = true to serve over HTTPS so that the X-API-Key header is not transmitted in plain text.
+enable_https = false
+
+[ssl]
+# Absolute paths to the server certificate / private key, required when plugins.enable_https = true.
+server_cert = ""
+server_key = ""

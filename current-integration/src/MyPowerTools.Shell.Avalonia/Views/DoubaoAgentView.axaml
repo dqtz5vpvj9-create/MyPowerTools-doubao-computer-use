@@ -1,0 +1,568 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="using:MyPowerTools.UI.Controls"
+             xmlns:services="using:MyPowerTools.Shell.Avalonia.Services"
+             xmlns:vm="using:MyPowerTools.Shell.Avalonia.ViewModels"
+             x:Class="MyPowerTools.Shell.Avalonia.Views.DoubaoAgentView"
+             x:DataType="vm:DoubaoAgentViewModel">
+  <UserControl.Styles>
+    <Style Selector="Ellipse.running">
+      <Setter Property="Fill" Value="{DynamicResource MptBrushSuccess}" />
+    </Style>
+    <Style Selector="Ellipse.error">
+      <Setter Property="Fill" Value="{DynamicResource MptBrushDanger}" />
+    </Style>
+  </UserControl.Styles>
+
+  <ScrollViewer HorizontalScrollBarVisibility="Disabled"
+                VerticalScrollBarVisibility="Auto">
+    <StackPanel MaxWidth="1480"
+                HorizontalAlignment="Stretch"
+                Spacing="{DynamicResource MptSpacingL}">
+      <Grid ColumnDefinitions="*,Auto"
+            ColumnSpacing="16">
+        <Grid ColumnDefinitions="46,*"
+              ColumnSpacing="12">
+          <Border Width="40"
+                  Height="40"
+                  CornerRadius="10"
+                  Background="{DynamicResource MptBrushAccent}">
+            <TextBlock Text="DA"
+                       FontSize="{DynamicResource MptFontSizeBody}"
+                       FontWeight="Bold"
+                       Foreground="{DynamicResource MptBrushAccentText}"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center" />
+          </Border>
+          <StackPanel Grid.Column="1"
+                      Spacing="{DynamicResource MptSpacingXs}"
+                      VerticalAlignment="Center">
+            <TextBlock Classes="MptPageTitle"
+                       Text="豆包 Computer Use" />
+            <TextBlock Classes="MptPageSubtitle"
+                       Text="用自然语言交给豆包视觉代理执行本机电脑任务" />
+          </StackPanel>
+        </Grid>
+        <controls:MptButton Grid.Column="1"
+                            Content="刷新"
+                            Command="{Binding RefreshCommand}"
+                            VerticalAlignment="Center" />
+      </Grid>
+
+      <Border Classes="MptCard"
+              Padding="{DynamicResource MptCompactPadding}">
+        <Grid ColumnDefinitions="Auto,*,Auto"
+              ColumnSpacing="14"
+              MinHeight="40">
+          <StackPanel Orientation="Horizontal"
+                      Spacing="{DynamicResource MptSpacingS}"
+                      VerticalAlignment="Center">
+            <TextBlock Text="{Binding RuntimeStatusText}"
+                       FontWeight="SemiBold"
+                       VerticalAlignment="Center" />
+            <Border Classes="MptStatusBadge"
+                    Classes.running="{Binding AllServicesOnline}"
+                    Classes.error="{Binding !AllServicesOnline}"
+                    VerticalAlignment="Center">
+              <TextBlock Classes="MptMeta"
+                         Text="{Binding ServiceSummary}" />
+            </Border>
+          </StackPanel>
+          <StackPanel Grid.Column="1"
+                      Spacing="{DynamicResource MptSpacingXs}"
+                      VerticalAlignment="Center">
+            <TextBlock Classes="MptMeta"
+                       Text="{Binding RuntimeStatusDetail}"
+                       TextTrimming="CharacterEllipsis"
+                       ToolTip.Tip="{Binding RuntimeStatusDetail}" />
+            <TextBlock Classes="MptMeta"
+                       Text="{Binding RuntimeStartedText}"
+                       TextTrimming="CharacterEllipsis" />
+          </StackPanel>
+          <WrapPanel Grid.Column="2"
+                     Orientation="Horizontal"
+                     VerticalAlignment="Center">
+            <controls:MptButton Classes="MptPrimaryButton"
+                                Content="启动"
+                                Margin="{DynamicResource MptWrapItemCompactMargin}"
+                                Command="{Binding StartRuntimeCommand}" />
+            <controls:MptButton Content="停止"
+                                Margin="{DynamicResource MptWrapItemCompactMargin}"
+                                Command="{Binding StopRuntimeCommand}" />
+            <controls:MptButton Content="重新启动"
+                                Margin="{DynamicResource MptGapBottomS}"
+                                Command="{Binding RestartRuntimeCommand}" />
+          </WrapPanel>
+        </Grid>
+      </Border>
+
+      <Border Classes="MptInset"
+              IsVisible="{Binding !RuntimeInstalled}">
+        <Grid ColumnDefinitions="22,*"
+              ColumnSpacing="8">
+          <TextBlock Text="&#xE7BA;"
+                     FontFamily="Segoe Fluent Icons"
+                     Foreground="{DynamicResource MptBrushWarning}" />
+          <TextBlock Grid.Column="1"
+                     Text="本机缺少豆包 Computer Use 运行时，启动、任务执行和屏幕标记功能当前不可用。"
+                     TextWrapping="Wrap" />
+        </Grid>
+      </Border>
+
+      <Border Classes="MptInset"
+              IsVisible="{Binding !SecretConfigured}">
+        <Grid ColumnDefinitions="22,*"
+              ColumnSpacing="8">
+          <TextBlock Text="&#xE72E;"
+                     FontFamily="Segoe Fluent Icons"
+                     Foreground="{DynamicResource MptBrushWarning}" />
+          <StackPanel Grid.Column="1"
+                      Spacing="{DynamicResource MptSpacingXs}">
+            <TextBlock Text="缺少模型密钥"
+                       FontWeight="SemiBold" />
+            <TextBlock Text="请在豆包本机密钥文件中配置 ARK_API_KEY。页面只检查是否存在，不会读取或显示密钥内容。"
+                       Classes="MptPageSubtitle"
+                       TextWrapping="Wrap" />
+          </StackPanel>
+        </Grid>
+      </Border>
+
+      <Border Classes="MptInset"
+              IsVisible="{Binding HasUnsafeListeners}">
+        <Grid ColumnDefinitions="22,*"
+              ColumnSpacing="8">
+          <TextBlock Text="&#xE7BA;"
+                     FontFamily="Segoe Fluent Icons"
+                     Foreground="{DynamicResource MptBrushDanger}" />
+          <StackPanel Grid.Column="1"
+                      Spacing="{DynamicResource MptSpacingXs}">
+            <TextBlock Text="无法读取本机服务端口状态"
+                       FontWeight="SemiBold"
+                       Foreground="{DynamicResource MptBrushDanger}" />
+            <TextBlock Text="{Binding ListenerSecurityText}"
+                       Classes="MptPageSubtitle"
+                       TextWrapping="Wrap" />
+            <TextBlock Text="为避免重复占用固定端口，启动与任务操作暂时停用。"
+                       Classes="MptMeta"
+                       TextWrapping="Wrap" />
+          </StackPanel>
+        </Grid>
+      </Border>
+
+      <Grid x:Name="WorkspaceGrid"
+            ColumnDefinitions="400,*"
+            ColumnSpacing="16">
+        <StackPanel x:Name="ControlPanel"
+                    Spacing="{DynamicResource MptSpacingL}">
+          <Border Classes="MptCard">
+            <StackPanel Spacing="{DynamicResource MptSpacingM}">
+              <TextBlock Classes="MptSectionTitle"
+                         Text="运行任务" />
+
+              <StackPanel Spacing="{DynamicResource MptSpacingS}">
+                <TextBlock Classes="MptMeta"
+                           Text="模型" />
+                <controls:MptComboBox ItemsSource="{Binding Models}"
+                                      SelectedItem="{Binding SelectedModel, Mode=TwoWay}"
+                                      HorizontalAlignment="Stretch">
+                  <controls:MptComboBox.ItemTemplate>
+                    <DataTemplate x:DataType="services:DoubaoAgentModel">
+                      <TextBlock Text="{Binding DisplayName}" />
+                    </DataTemplate>
+                  </controls:MptComboBox.ItemTemplate>
+                </controls:MptComboBox>
+              </StackPanel>
+
+              <StackPanel Spacing="{DynamicResource MptSpacingS}">
+                <TextBlock Classes="MptMeta"
+                           Text="任务" />
+                <controls:MptTextBox Text="{Binding Instruction, Mode=TwoWay}"
+                         PlaceholderText="描述你希望代理在电脑上完成的操作"
+                         MaxLength="10000"
+                         AcceptsReturn="True"
+                         TextWrapping="Wrap"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto"
+                         MinHeight="118"
+                         MaxHeight="220" />
+              </StackPanel>
+
+              <controls:MptCheckBox IsChecked="{Binding AutoStartEnabled, Mode=TwoWay}"
+                                    IsEnabled="{Binding CanEnableAutoStart}"
+                                    Content="打开时自动启动本地服务" />
+
+              <Expander Header="高级指令"
+                        IsExpanded="{Binding ShowSystemPrompt, Mode=TwoWay}">
+                <controls:MptTextBox Text="{Binding SystemPrompt, Mode=TwoWay}"
+                         MaxLength="20000"
+                         AcceptsReturn="True"
+                         TextWrapping="Wrap"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto"
+                         MinHeight="112"
+                         MaxHeight="240" />
+              </Expander>
+
+              <WrapPanel Orientation="Horizontal">
+                <controls:MptButton Classes="MptPrimaryButton"
+                                    Content="运行"
+                                    Margin="{DynamicResource MptWrapItemCompactMargin}"
+                                    Command="{Binding RunTaskCommand}" />
+                <controls:MptButton Content="停止任务"
+                                    Margin="{DynamicResource MptWrapItemCompactMargin}"
+                                    Command="{Binding StopTaskCommand}" />
+                <controls:MptButton Content="清空记录"
+                                    Margin="{DynamicResource MptGapBottomS}"
+                                    Command="{Binding ClearTraceCommand}" />
+              </WrapPanel>
+            </StackPanel>
+          </Border>
+
+          <Border Classes="MptCard">
+            <StackPanel Spacing="{DynamicResource MptSpacingM}">
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Classes="MptSectionTitle"
+                           Text="本地服务" />
+                <TextBlock Grid.Column="1"
+                           Classes="MptMeta"
+                           Text="{Binding CheckedAtText}" />
+              </Grid>
+
+              <ItemsControl ItemsSource="{Binding Services}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="services:DoubaoAgentServiceStatus">
+                    <Grid ColumnDefinitions="12,*,Auto"
+                          ColumnSpacing="9"
+                          Margin="{DynamicResource MptVerticalXsMargin}">
+                      <Ellipse Width="8"
+                               Height="8"
+                               Fill="{DynamicResource MptBrushTextMuted}"
+                               Classes.running="{Binding IsOnline}"
+                               VerticalAlignment="Center" />
+                      <StackPanel Grid.Column="1"
+                                  Spacing="{DynamicResource MptSpacingXs}">
+                        <TextBlock Text="{Binding DisplayName}"
+                                   FontWeight="SemiBold" />
+                        <TextBlock Classes="MptMeta"
+                                   Text="{Binding Endpoint}"
+                                   TextTrimming="CharacterEllipsis" />
+                      </StackPanel>
+                      <StackPanel Grid.Column="2"
+                                  HorizontalAlignment="Right"
+                                  Spacing="{DynamicResource MptSpacingXs}">
+                        <TextBlock Text="{Binding StateText}"
+                                   FontWeight="SemiBold"
+                                   HorizontalAlignment="Right" />
+                        <TextBlock Classes="MptMeta"
+                                   Text="{Binding Detail}"
+                                   HorizontalAlignment="Right" />
+                      </StackPanel>
+                    </Grid>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+
+              <Grid ColumnDefinitions="12,*,Auto"
+                    ColumnSpacing="9"
+                    Margin="{DynamicResource MptVerticalXsMargin}">
+                <Ellipse Width="8"
+                         Height="8"
+                         Fill="{DynamicResource MptBrushTextMuted}"
+                         VerticalAlignment="Center" />
+                <StackPanel Grid.Column="1"
+                            Spacing="{DynamicResource MptSpacingXs}">
+                  <TextBlock Text="屏幕标记"
+                             FontWeight="SemiBold" />
+                  <TextBlock Classes="MptMeta"
+                             Text="{Binding OverlayDiagnosticText}" />
+                </StackPanel>
+                <TextBlock Grid.Column="2"
+                           Text="{Binding OverlayStateText}"
+                           VerticalAlignment="Center" />
+              </Grid>
+
+              <Expander Header="屏幕标记调试">
+                <StackPanel Spacing="{DynamicResource MptSpacingM}">
+                  <Grid ColumnDefinitions="*,*"
+                        RowDefinitions="Auto,Auto"
+                        ColumnSpacing="10"
+                        RowSpacing="10">
+                    <StackPanel Spacing="{DynamicResource MptSpacingXs}">
+                      <TextBlock Classes="MptMeta" Text="X 坐标" />
+                      <NumericUpDown Value="{Binding OverlayX, Mode=TwoWay}"
+                                     Minimum="0" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Spacing="{DynamicResource MptSpacingXs}">
+                      <TextBlock Classes="MptMeta" Text="Y 坐标" />
+                      <NumericUpDown Value="{Binding OverlayY, Mode=TwoWay}"
+                                     Minimum="0" />
+                    </StackPanel>
+                    <StackPanel Grid.Row="1" Spacing="{DynamicResource MptSpacingXs}">
+                      <TextBlock Classes="MptMeta" Text="持续时间（毫秒）" />
+                      <NumericUpDown Value="{Binding OverlayDurationMs, Mode=TwoWay}"
+                                     Minimum="200"
+                                     Maximum="6000" />
+                    </StackPanel>
+                    <StackPanel Grid.Row="1" Grid.Column="1" Spacing="{DynamicResource MptSpacingXs}">
+                      <TextBlock Classes="MptMeta" Text="标记半径" />
+                      <NumericUpDown Value="{Binding OverlayRadius, Mode=TwoWay}"
+                                     Minimum="8"
+                                     Maximum="120" />
+                    </StackPanel>
+                  </Grid>
+                  <WrapPanel Orientation="Horizontal">
+                    <controls:MptButton Content="显示"
+                                        Margin="{DynamicResource MptWrapItemCompactMargin}"
+                                        Command="{Binding ShowOverlayCommand}" />
+                    <controls:MptButton Content="隐藏"
+                                        Margin="{DynamicResource MptWrapItemCompactMargin}"
+                                        Command="{Binding HideOverlayCommand}" />
+                    <controls:MptButton Content="自检"
+                                        Margin="{DynamicResource MptGapBottomS}"
+                                        Command="{Binding OverlaySelfTestCommand}" />
+                  </WrapPanel>
+                </StackPanel>
+              </Expander>
+            </StackPanel>
+          </Border>
+        </StackPanel>
+
+        <StackPanel x:Name="ActivityPanel"
+                    Grid.Column="1"
+                    Spacing="{DynamicResource MptSpacingL}">
+          <Grid ColumnDefinitions="*,*,*,*"
+                ColumnSpacing="10">
+            <Border Classes="MptMetricTile MptCard" MinHeight="82">
+              <StackPanel Spacing="{DynamicResource MptSpacingXs}">
+                <TextBlock Classes="MptMeta" Text="截图" />
+                <TextBlock Classes="MptCardTitle" Text="{Binding ScreenshotCount}" />
+              </StackPanel>
+            </Border>
+            <Border Grid.Column="1" Classes="MptMetricTile MptCard" MinHeight="82">
+              <StackPanel Spacing="{DynamicResource MptSpacingXs}">
+                <TextBlock Classes="MptMeta" Text="动作" />
+                <TextBlock Classes="MptCardTitle" Text="{Binding ActionCount}" />
+              </StackPanel>
+            </Border>
+            <Border Grid.Column="2" Classes="MptMetricTile MptCard" MinHeight="82">
+              <StackPanel Spacing="{DynamicResource MptSpacingXs}">
+                <TextBlock Classes="MptMeta" Text="Grounding" />
+                <TextBlock Classes="MptCardTitle" Text="{Binding GroundingCount}" />
+              </StackPanel>
+            </Border>
+            <Border Grid.Column="3" Classes="MptMetricTile MptCard" MinHeight="82">
+              <StackPanel Spacing="{DynamicResource MptSpacingXs}">
+                <TextBlock Classes="MptMeta" Text="用时" />
+                <TextBlock Classes="MptCardTitle" Text="{Binding TaskDurationText}" />
+              </StackPanel>
+            </Border>
+          </Grid>
+
+          <Border Classes="MptCard">
+            <Grid RowDefinitions="Auto,280"
+                  RowSpacing="12">
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Classes="MptSectionTitle"
+                           Text="截图预览" />
+                <TextBlock Grid.Column="1"
+                           Classes="MptMeta"
+                           Text="{Binding ActionMessage}" />
+              </Grid>
+              <Border Grid.Row="1"
+                      CornerRadius="{DynamicResource MptRadiusCard}"
+                      Background="{DynamicResource MptBrushSurfaceInset}"
+                      ClipToBounds="True">
+                <Grid>
+                  <Image Source="{Binding LatestScreenshot}"
+                         Stretch="Uniform"
+                         IsVisible="{Binding HasLatestScreenshot}" />
+                  <StackPanel HorizontalAlignment="Center"
+                              VerticalAlignment="Center"
+                              Spacing="{DynamicResource MptSpacingS}"
+                              IsVisible="{Binding !HasLatestScreenshot}">
+                    <TextBlock Text="&#xE722;"
+                               FontFamily="Segoe Fluent Icons"
+                               FontSize="{DynamicResource MptFontSizeTitle}"
+                               Foreground="{DynamicResource MptBrushTextMuted}"
+                               HorizontalAlignment="Center" />
+                    <TextBlock Text="等待画面"
+                               Foreground="{DynamicResource MptBrushTextPrimary}"
+                               FontSize="{DynamicResource MptFontSizeCardTitle}"
+                               FontWeight="SemiBold" />
+                    <TextBlock Text="运行任务后显示最新截图"
+                               Foreground="{DynamicResource MptBrushTextMuted}" />
+                  </StackPanel>
+                </Grid>
+              </Border>
+            </Grid>
+          </Border>
+
+          <Grid x:Name="TraceDetailsGrid"
+                ColumnDefinitions="1.05*,0.95*"
+                ColumnSpacing="16">
+            <Border x:Name="TraceCard"
+                    Classes="MptCard"
+                    VerticalAlignment="Stretch">
+              <Grid RowDefinitions="Auto,380"
+                    RowSpacing="12">
+                <Grid ColumnDefinitions="*,Auto">
+                  <TextBlock Classes="MptSectionTitle"
+                             Text="运行记录" />
+                  <TextBlock Grid.Column="1"
+                             Classes="MptMeta"
+                             Text="{Binding TaskDurationText}" />
+                </Grid>
+                <Grid Grid.Row="1">
+                  <TextBlock Text="等待任务"
+                             Classes="MptPageSubtitle"
+                             HorizontalAlignment="Center"
+                             VerticalAlignment="Center"
+                             IsVisible="{Binding !HasTrace}" />
+                  <ListBox ItemsSource="{Binding Trace}"
+                           SelectedItem="{Binding SelectedTrace, Mode=TwoWay}"
+                           IsVisible="{Binding HasTrace}"
+                           Background="{DynamicResource MptBrushTransparent}"
+                           BorderThickness="0">
+                    <ListBox.ItemTemplate>
+                      <DataTemplate x:DataType="vm:DoubaoAgentTraceItemViewModel">
+                        <Border Classes="MptInset"
+                                Margin="{DynamicResource MptGapBottomS}"
+                                Padding="{DynamicResource MptCompactPadding}">
+                          <Grid ColumnDefinitions="12,*,Auto"
+                                RowDefinitions="Auto,Auto"
+                                ColumnSpacing="8">
+                            <Ellipse Width="8"
+                                     Height="8"
+                                     Fill="{DynamicResource MptBrushSuccess}"
+                                     VerticalAlignment="Center"
+                                     Classes.error="{Binding IsError}" />
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding Title}"
+                                       FontWeight="SemiBold"
+                                       TextTrimming="CharacterEllipsis" />
+                            <TextBlock Grid.Column="2"
+                                       Classes="MptMeta"
+                                       Text="{Binding TimeText}" />
+                            <TextBlock Grid.Row="1"
+                                       Grid.Column="1"
+                                       Grid.ColumnSpan="2"
+                                       Classes="MptMeta"
+                                       Text="{Binding Detail}"
+                                       TextWrapping="Wrap"
+                                       MaxHeight="46"
+                                       TextTrimming="CharacterEllipsis"
+                                       IsVisible="{Binding HasDetail}" />
+                          </Grid>
+                        </Border>
+                      </DataTemplate>
+                    </ListBox.ItemTemplate>
+                  </ListBox>
+                </Grid>
+              </Grid>
+            </Border>
+
+            <Border x:Name="DetailsCard"
+                    Grid.Column="1"
+                    Classes="MptCard"
+                    VerticalAlignment="Stretch">
+              <StackPanel Spacing="{DynamicResource MptSpacingM}">
+                <TextBlock Classes="MptSectionTitle"
+                           Text="记录详情" />
+                <controls:MptTextBox Text="{Binding SelectedTraceDetail}"
+                         IsReadOnly="True"
+                         AcceptsReturn="True"
+                         TextWrapping="Wrap"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto"
+                         MinHeight="138"
+                         MaxHeight="190" />
+                <Expander Header="原始数据">
+                  <controls:MptTextBox Text="{Binding SelectedTraceJson}"
+                           IsReadOnly="True"
+                           AcceptsReturn="True"
+                           TextWrapping="NoWrap"
+                           FontFamily="Cascadia Mono, Consolas"
+                           FontSize="{DynamicResource MptFontSizeMeta}"
+                           ScrollViewer.VerticalScrollBarVisibility="Auto"
+                           ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                           MinHeight="120"
+                           MaxHeight="220" />
+                </Expander>
+                <Expander Header="运行时诊断">
+                  <controls:MptTextBox Text="{Binding DiagnosticText}"
+                           IsReadOnly="True"
+                           AcceptsReturn="True"
+                           TextWrapping="Wrap"
+                           ScrollViewer.VerticalScrollBarVisibility="Auto"
+                           MinHeight="120"
+                           MaxHeight="240" />
+                </Expander>
+              </StackPanel>
+            </Border>
+          </Grid>
+        </StackPanel>
+      </Grid>
+
+      <Expander Header="进程、端口与日志">
+        <Border Classes="MptCard"
+                Margin="{DynamicResource MptGapTopS}">
+          <StackPanel Spacing="{DynamicResource MptSpacingL}">
+            <TextBlock Classes="MptPageSubtitle"
+                       Text="{Binding ConfigurationSummary}"
+                       TextWrapping="Wrap" />
+
+            <ItemsControl ItemsSource="{Binding RuntimeProcesses}"
+                          IsVisible="{Binding HasRuntimeProcesses}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="services:DoubaoAgentRuntimeProcess">
+                  <Grid ColumnDefinitions="*,110,110,180"
+                        ColumnSpacing="12"
+                        Margin="{DynamicResource MptVerticalXsMargin}">
+                    <TextBlock Text="{Binding DisplayName}"
+                               FontWeight="SemiBold" />
+                    <TextBlock Grid.Column="1"
+                               Classes="MptMono"
+                               Text="{Binding ProcessIdText, StringFormat='PID {0}'}" />
+                    <TextBlock Grid.Column="2"
+                               Classes="MptMono"
+                               Text="{Binding PortText, StringFormat='Port {0}'}" />
+                    <TextBlock Grid.Column="3"
+                               Text="{Binding StateText}" />
+                  </Grid>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <TextBlock Text="没有已通过身份验证的 MyPowerTools 进程。外部或旧启动链进程仅显示在服务监听状态中。"
+                       Classes="MptPageSubtitle"
+                       IsVisible="{Binding !HasRuntimeProcesses}" />
+
+            <Separator />
+            <TextBlock Classes="MptCardTitle"
+                       Text="最近日志" />
+            <ItemsControl ItemsSource="{Binding Logs}"
+                          IsVisible="{Binding HasLogs}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="services:DoubaoAgentLogFile">
+                  <Grid ColumnDefinitions="*,100,130"
+                        ColumnSpacing="12"
+                        Margin="{DynamicResource MptVerticalXsMargin}">
+                    <TextBlock Text="{Binding Name}"
+                               Classes="MptMono" />
+                    <TextBlock Grid.Column="1"
+                               Text="{Binding SizeText}"
+                               HorizontalAlignment="Right" />
+                    <TextBlock Grid.Column="2"
+                               Classes="MptMeta"
+                               Text="{Binding UpdatedAtText}"
+                               HorizontalAlignment="Right" />
+                  </Grid>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <TextBlock Text="运行时尚未生成日志。"
+                       Classes="MptPageSubtitle"
+                       IsVisible="{Binding !HasLogs}" />
+          </StackPanel>
+        </Border>
+      </Expander>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

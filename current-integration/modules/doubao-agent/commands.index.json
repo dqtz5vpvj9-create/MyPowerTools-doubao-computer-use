@@ -1,0 +1,104 @@
+{
+  "schemaVersion": "1.0",
+  "commands": [
+    {
+      "id": "doubao-agent.status.summary",
+      "title": "Summarize Doubao runtime status",
+      "subtitle": "Checks Planner 38189, Tool Server 38102, and MCP Server 38080",
+      "kind": "action",
+      "category": "Doubao Agent",
+      "timeoutMs": 8000,
+      "execution": {
+        "type": "module.execute"
+      }
+    },
+    {
+      "id": "doubao-agent.health.check",
+      "title": "Check all Doubao runtime services",
+      "subtitle": "Queries the three local Computer Use services",
+      "kind": "action",
+      "category": "Doubao Agent",
+      "timeoutMs": 8000,
+      "execution": {
+        "type": "module.execute"
+      }
+    },
+    {
+      "id": "doubao-agent.planner.health",
+      "title": "Check Doubao planner",
+      "subtitle": "Queries Agent Planner on port 38189",
+      "kind": "action",
+      "category": "Doubao Agent",
+      "timeoutMs": 8000,
+      "execution": {
+        "type": "module.execute"
+      }
+    },
+    {
+      "id": "doubao-agent.tool.health",
+      "title": "Check Doubao tool server",
+      "subtitle": "Queries Tool Server on port 38102",
+      "kind": "action",
+      "category": "Doubao Agent",
+      "timeoutMs": 8000,
+      "execution": {
+        "type": "module.execute"
+      }
+    },
+    {
+      "id": "doubao-agent.mcp.health",
+      "title": "Check Doubao MCP server",
+      "subtitle": "Checks the MCP SSE endpoint on port 38080",
+      "kind": "action",
+      "category": "Doubao Agent",
+      "timeoutMs": 8000,
+      "execution": {
+        "type": "module.execute"
+      }
+    },
+    {
+      "id": "doubao-agent.self-test",
+      "title": "Run Doubao controller self-test",
+      "subtitle": "Verifies data, cache, logs, settings, and redaction boundaries",
+      "kind": "action",
+      "category": "Doubao Agent",
+      "timeoutMs": 8000,
+      "execution": {
+        "type": "module.execute"
+      }
+    },
+    {
+      "id": "doubao-agent.logs.summary",
+      "title": "Summarize Doubao module logs",
+      "subtitle": "Reports Runner-managed log directory state",
+      "kind": "action",
+      "category": "Doubao Agent",
+      "timeoutMs": 8000,
+      "execution": {
+        "type": "module.execute"
+      }
+    },
+    {
+      "id": "doubao-agent.logs.tail",
+      "title": "Show Doubao logs",
+      "subtitle": "Open the latest Runner-side module logs",
+      "kind": "open",
+      "category": "Doubao Agent",
+      "execution": {
+        "type": "navigation",
+        "toolId": "doubao-agent",
+        "routeId": "services"
+      }
+    },
+    {
+      "id": "doubao-agent.notification.test",
+      "title": "Send Doubao test notification",
+      "subtitle": "Publishes a NotificationCenter event",
+      "kind": "action",
+      "category": "Doubao Agent",
+      "execution": {
+        "type": "host.notification.test"
+      }
+    }
+  ]
+}
