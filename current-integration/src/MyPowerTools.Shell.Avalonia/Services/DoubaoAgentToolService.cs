@@ -122,11 +122,6 @@ public sealed class DoubaoAgentToolService : IDisposable
             return new DoubaoAgentOperationResult(false, "未找到豆包 Computer Use 本地运行时。", "runtime-missing");
         }
 
-        if (!SecretIsConfigured())
-        {
-            return new DoubaoAgentOperationResult(false, "请先在本机密钥文件中配置 ARK_API_KEY。", "secret-missing");
-        }
-
         var current = await LoadAsync(cancellationToken).ConfigureAwait(false);
         if (current.AllServicesOnline)
         {

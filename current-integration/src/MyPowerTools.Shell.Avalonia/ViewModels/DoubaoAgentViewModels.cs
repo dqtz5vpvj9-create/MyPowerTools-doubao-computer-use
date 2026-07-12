@@ -143,8 +143,10 @@ public sealed partial class DoubaoAgentViewModel : ToolProductPageViewModel, IDi
         ? "状态读取失败"
         : !RuntimeInstalled
         ? "未安装"
-        : AllServicesOnline
+        : AllServicesOnline && SecretConfigured
             ? "可以执行任务"
+            : AllServicesOnline
+                ? "服务在线，等待密钥"
             : AnyServiceOnline
                 ? "部分服务异常"
                 : "服务已停止";
@@ -176,9 +178,9 @@ public sealed partial class DoubaoAgentViewModel : ToolProductPageViewModel, IDi
             $"{listener.Address}:{listener.Port} / PID {listener.ProcessId}"));
     public string DiagnosticText => BuildDiagnosticText();
     public bool IsRuntimeReady => RuntimeInstalled && SecretConfigured;
-    public bool CanStartRuntime => IsRuntimeReady && RuntimeSecurity.IsSafe && !AnyServiceOnline && !IsBusy && !IsTaskRunning;
+    public bool CanStartRuntime => RuntimeInstalled && RuntimeSecurity.IsSafe && !AnyServiceOnline && !IsBusy && !IsTaskRunning;
     public bool CanStopRuntime => HasOwnedProcesses && !IsBusy && !IsTaskRunning;
-    public bool CanRestartRuntime => IsRuntimeReady && RuntimeSecurity.IsSafe && HasOwnedProcesses && !IsBusy && !IsTaskRunning;
+    public bool CanRestartRuntime => RuntimeInstalled && RuntimeSecurity.IsSafe && HasOwnedProcesses && !IsBusy && !IsTaskRunning;
     public bool CanRunTask => IsRuntimeReady &&
                               RuntimeSecurity.IsSafe &&
                               !IsBusy &&

@@ -294,6 +294,46 @@ public sealed class DoubaoAgentProductTests
     }
 
     [Fact]
+    public async Task Auto_start_launches_foundation_services_without_an_ark_key()
+    {
+        using var runtime = new TemporaryDoubaoRuntime();
+        File.WriteAllText(runtime.SecretFile, "");
+        var handler = new DoubaoRuntimeHandler { IsAvailable = false };
+        var controller = new FakeRuntimeController(SafeSecurity(owned: false));
+        controller.OnStart = () =>
+        {
+            handler.IsAvailable = true;
+            controller.State = SafeSecurity(owned: true);
+        };
+        using var httpClient = new HttpClient(handler);
+        using var service = new DoubaoAgentToolService(
+            httpClient,
+            runtime.Root,
+            runtime.SecretFile,
+            (_, port, token) =>
+            {
+                token.ThrowIfCancellationRequested();
+                return Task.FromResult(port == 38080 && handler.IsAvailable);
+            },
+            runtimeController: controller);
+        var offline = await service.LoadAsync();
+        using var viewModel = new DoubaoAgentViewModel(offline, service);
+
+        Assert.False(viewModel.SecretConfigured);
+        Assert.True(viewModel.AutoStartEnabled);
+        Assert.True(viewModel.CanStartRuntime);
+
+        await viewModel.InitializeAsync();
+
+        Assert.Equal(1, controller.StartCount);
+        Assert.True(viewModel.AllServicesOnline);
+        Assert.Equal("服务在线，等待密钥", viewModel.RuntimeStatusText);
+        Assert.False(viewModel.CanRunTask);
+        Assert.True(viewModel.CanStopRuntime);
+        Assert.True(viewModel.CanRestartRuntime);
+    }
+
+    [Fact]
     public async Task Runtime_control_uses_the_owned_controller_and_never_executes_legacy_scripts()
     {
         using var runtime = new TemporaryDoubaoRuntime();
