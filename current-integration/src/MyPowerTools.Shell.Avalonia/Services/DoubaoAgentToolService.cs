@@ -10,7 +10,7 @@ using System.Text.RegularExpressions;
 
 namespace MyPowerTools.Shell.Avalonia.Services;
 
-public sealed class DoubaoAgentToolService : IDisposable
+public sealed partial class DoubaoAgentToolService : IDisposable
 {
     public const string ModuleId = "doubao-agent";
     public const string PreferredDefaultModelName = "doubao-seed-2-0-lite-260428";
@@ -47,7 +47,6 @@ public sealed class DoubaoAgentToolService : IDisposable
     private readonly TimeSpan _shutdownReadyTimeout;
     private readonly IDoubaoSecureRuntimeController _runtimeController;
     private readonly bool _ownsRuntimeController;
-    private readonly string _toolAuthKey;
 
     public DoubaoAgentToolService(
         HttpClient? httpClient = null,
@@ -55,7 +54,8 @@ public sealed class DoubaoAgentToolService : IDisposable
         string? secretFilePath = null,
         Func<string, int, CancellationToken, Task<bool>>? tcpProbe = null,
         TimeSpan? shutdownReadyTimeout = null,
-        IDoubaoSecureRuntimeController? runtimeController = null)
+        IDoubaoSecureRuntimeController? runtimeController = null,
+        string? settingsFilePath = null)
     {
         _ownsHttpClient = httpClient is null;
         _httpClient = httpClient ?? CreateLoopbackHttpClient();
@@ -68,11 +68,12 @@ public sealed class DoubaoAgentToolService : IDisposable
         _shutdownReadyTimeout = shutdownReadyTimeout ?? TimeSpan.FromSeconds(10);
         _runtimeController = runtimeController ?? new DoubaoSecureRuntimeController();
         _ownsRuntimeController = runtimeController is null;
-        _toolAuthKey = ReadToolAuthKey(RuntimeRoot, _secretFilePath);
+        _settingsFilePath = Path.GetFullPath(settingsFilePath ?? ResolveSettingsFilePath());
+        Session = LoadSessionState();
     }
 
     public string RuntimeRoot { get; }
-    public DoubaoAgentSessionState Session { get; } = new();
+    public DoubaoAgentSessionState Session { get; }
 
     public async Task<DoubaoAgentSnapshot> LoadAsync(CancellationToken cancellationToken = default)
     {
@@ -344,6 +345,7 @@ public sealed class DoubaoAgentToolService : IDisposable
 
     public void Dispose()
     {
+        PersistSessionBestEffort();
         if (_ownsHttpClient)
         {
             _httpClient.Dispose();
@@ -387,11 +389,12 @@ public sealed class DoubaoAgentToolService : IDisposable
         {
             using var request = new HttpRequestMessage(HttpMethod.Get, uri);
             request.Headers.Accept.ParseAdd("application/json");
+            var toolAuthKey = ReadToolAuthKey(RuntimeRoot, _secretFilePath);
             if (uri.Port == CanonicalToolServerUri.Port &&
                 string.Equals(uri.Host, CanonicalToolServerUri.Host, StringComparison.OrdinalIgnoreCase) &&
-                !string.IsNullOrWhiteSpace(_toolAuthKey))
+                !string.IsNullOrWhiteSpace(toolAuthKey))
             {
-                request.Headers.TryAddWithoutValidation("X-API-Key", _toolAuthKey);
+                request.Headers.TryAddWithoutValidation("X-API-Key", toolAuthKey);
             }
             using var response = await _httpClient.SendAsync(request, timeout.Token).ConfigureAwait(false);
             var body = await response.Content.ReadAsStringAsync(timeout.Token).ConfigureAwait(false);
@@ -581,12 +584,18 @@ public sealed class DoubaoAgentToolService : IDisposable
     private DoubaoAgentConfigurationState ReadConfigurationState()
     {
         var envPath = _secretFilePath;
+        var secrets = ReadSecretConfiguration();
         return new DoubaoAgentConfigurationState(
             File.Exists(Path.Combine(RuntimeRoot, "tool_server", "config.toml")),
             File.Exists(Path.Combine(RuntimeRoot, "planner", "config.toml")),
             File.Exists(envPath),
             Directory.Exists(DoubaoSecureRuntimeController.ResolveLogsDirectory(RuntimeRoot)),
-            envPath);
+            envPath,
+            secrets.ArkApiKeyConfigured,
+            secrets.AuthKeyConfigured,
+            secrets.AuthApiKeyConfigured,
+            _settingsFilePath,
+            PlannerOverrideConfigPath);
     }
 
     private static string ServiceDisplayName(string id)
@@ -837,38 +846,31 @@ public sealed class DoubaoAgentToolService : IDisposable
 
     private static string ReadEnvironmentValue(string path, string name)
     {
-        var inherited = Environment.GetEnvironmentVariable(name);
-        if (!string.IsNullOrWhiteSpace(inherited))
+        if (File.Exists(path))
         {
-            return inherited.Trim();
-        }
-        if (!File.Exists(path))
-        {
-            return "";
-        }
-
-        try
-        {
-            foreach (var line in File.ReadLines(path))
+            try
             {
-                var trimmed = line.Trim();
-                if (trimmed.Length == 0 || trimmed.StartsWith('#'))
+                foreach (var line in File.ReadLines(path))
                 {
-                    continue;
+                    var trimmed = line.Trim();
+                    if (trimmed.Length == 0 || trimmed.StartsWith('#'))
+                    {
+                        continue;
+                    }
+                    var separator = trimmed.IndexOf('=');
+                    if (separator < 1 ||
+                        !string.Equals(trimmed[..separator].Trim(), name, StringComparison.OrdinalIgnoreCase))
+                    {
+                        continue;
+                    }
+                    return trimmed[(separator + 1)..].Trim().Trim('"', '\'');
                 }
-                var separator = trimmed.IndexOf('=');
-                if (separator < 1 ||
-                    !string.Equals(trimmed[..separator].Trim(), name, StringComparison.OrdinalIgnoreCase))
-                {
-                    continue;
-                }
-                return trimmed[(separator + 1)..].Trim().Trim('"', '\'');
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
             }
         }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-        {
-        }
-        return "";
+        return Environment.GetEnvironmentVariable(name)?.Trim() ?? "";
     }
 
     private static string ReadToolAuthKey(string runtimeRoot, string secretFilePath)
@@ -1311,7 +1313,12 @@ public sealed record DoubaoAgentConfigurationState(
     bool PlannerConfigExists,
     bool SecretFileExists,
     bool LogDirectoryExists,
-    string SecretFilePath);
+    string SecretFilePath,
+    bool ArkApiKeyConfigured = false,
+    bool AuthKeyConfigured = false,
+    bool AuthApiKeyConfigured = false,
+    string SettingsFilePath = "",
+    string PlannerOverrideConfigPath = "");
 
 public sealed record DoubaoAgentTaskRequest(string Instruction, string ModelName, string SystemPrompt);
 
@@ -1338,4 +1345,5 @@ public sealed class DoubaoAgentSessionState
     public int OverlayY { get; set; } = 360;
     public int OverlayDurationMs { get; set; } = 1800;
     public int OverlayRadius { get; set; } = 34;
+    public string PlannerApiBaseUrl { get; set; } = "https://ark.cn-beijing.volces.com/api/v3";
 }

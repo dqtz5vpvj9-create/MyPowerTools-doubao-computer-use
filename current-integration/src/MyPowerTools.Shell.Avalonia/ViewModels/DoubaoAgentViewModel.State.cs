@@ -32,7 +32,9 @@ public sealed partial class DoubaoAgentViewModel
             nameof(Services), nameof(Models), nameof(Logs), nameof(RuntimeProcesses), nameof(Configuration),
             nameof(RuntimeInstalled), nameof(SecretConfigured), nameof(AllServicesOnline), nameof(AnyServiceOnline),
             nameof(RuntimeSecurity), nameof(HasUnsafeListeners), nameof(HasOwnedProcesses), nameof(CanEnableAutoStart),
-            nameof(ToolServerOnline), nameof(PlannerOnline), nameof(McpServerOnline), nameof(HasLogs),
+            nameof(ToolServerOnline), nameof(PlannerOnline), nameof(McpServerOnline), nameof(ArkApiKeyConfigured),
+            nameof(AuthKeyConfigured), nameof(AuthApiKeyConfigured), nameof(ArkApiKeyStatus), nameof(AuthKeyStatus),
+            nameof(AuthApiKeyStatus), nameof(HasLogs),
             nameof(HasRuntimeProcesses), nameof(RuntimeRoot), nameof(CheckedAtText), nameof(RuntimeStartedText),
             nameof(ServiceSummary), nameof(RuntimeStatusText), nameof(RuntimeStatusDetail), nameof(OverlayStateText),
             nameof(OverlayDiagnosticText), nameof(ListenerSecurityText),
@@ -50,7 +52,7 @@ public sealed partial class DoubaoAgentViewModel
         {
             RefreshCommand, StartRuntimeCommand, StopRuntimeCommand, RestartRuntimeCommand,
             RunTaskCommand, StopTaskCommand, ClearTraceCommand, ShowOverlayCommand, HideOverlayCommand,
-            OverlaySelfTestCommand
+            OverlaySelfTestCommand, SaveConfigurationCommand, TestConfigurationCommand
         }.OfType<AsyncRelayCommand>())
         {
             command.NotifyCanExecuteChanged();

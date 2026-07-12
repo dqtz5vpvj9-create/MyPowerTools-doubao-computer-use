@@ -592,6 +592,10 @@ public sealed class DoubaoSecureRuntimeController : IDoubaoSecureRuntimeControll
         var plannerDirectory = Path.Combine(runtimeRoot, "planner");
         var plannerAppDirectory = Path.Combine(plannerDirectory, "src", "planner");
         var logsDirectory = ResolveLogsDirectory(runtimeRoot);
+        var plannerOverrideConfigPath = ResolvePlannerOverrideConfigPath();
+        var plannerConfigPath = File.Exists(plannerOverrideConfigPath)
+            ? plannerOverrideConfigPath
+            : Path.Combine(plannerDirectory, "config.toml");
 
         return
         [
@@ -631,7 +635,7 @@ public sealed class DoubaoSecureRuntimeController : IDoubaoSecureRuntimeControll
                 plannerAppDirectory,
                 ["-m", "uvicorn", "app:app", "--host", "127.0.0.1", "--port", "38189"],
                 WithEnvironment(plannerEnvironment,
-                    ("CONFIG_FILES", Path.Combine(plannerDirectory, "config.toml")),
+                    ("CONFIG_FILES", plannerConfigPath),
                     ("SANDBOX__MCP_SERVER_ENDPOINT", "http://127.0.0.1:38080/sse"),
                     ("SANDBOX__TOOL_SERVER_ENDPOINT_FORMAT", "http://127.0.0.1:38102"),
                     ("LOG__FILENAME", Path.Combine(logsDirectory, "planner.log"))),
@@ -1047,6 +1051,9 @@ public sealed class DoubaoSecureRuntimeController : IDoubaoSecureRuntimeControll
         _ = runtimeRoot;
         return Path.Combine(ResolveWritableDataRoot(), "logs");
     }
+
+    internal static string ResolvePlannerOverrideConfigPath() =>
+        Path.Combine(ResolveWritableDataRoot(), "planner.override.toml");
 
     private static string StatePath(string runtimeRoot) =>
         Path.Combine(ResolveLogsDirectory(runtimeRoot), "mypowertools-secure-runtime.json");

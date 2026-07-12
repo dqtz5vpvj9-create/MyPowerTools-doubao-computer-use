@@ -17,6 +17,7 @@ public sealed partial class DoubaoAgentViewModel
             if (SetProperty(ref _autoStartEnabled, value))
             {
                 _service.Session.AutoStartEnabled = value;
+                _service.PersistSessionBestEffort();
                 NotifyCommandStates();
             }
         }
@@ -30,6 +31,7 @@ public sealed partial class DoubaoAgentViewModel
             if (SetProperty(ref _instruction, value))
             {
                 _service.Session.Instruction = value;
+                _service.PersistSessionBestEffort();
                 NotifyCommandStates();
             }
         }
@@ -43,6 +45,7 @@ public sealed partial class DoubaoAgentViewModel
             if (SetProperty(ref _systemPrompt, value))
             {
                 _service.Session.SystemPrompt = value;
+                _service.PersistSessionBestEffort();
             }
         }
     }
@@ -57,6 +60,7 @@ public sealed partial class DoubaoAgentViewModel
                 if (value is not null)
                 {
                     _service.Session.SelectedModelName = value.Name;
+                    _service.PersistSessionBestEffort();
                 }
                 NotifyCommandStates();
             }
@@ -71,6 +75,7 @@ public sealed partial class DoubaoAgentViewModel
             if (SetProperty(ref _showSystemPrompt, value))
             {
                 _service.Session.ShowSystemPrompt = value;
+                _service.PersistSessionBestEffort();
             }
         }
     }
@@ -103,6 +108,7 @@ public sealed partial class DoubaoAgentViewModel
             if (SetProperty(ref _overlayX, normalized))
             {
                 _service.Session.OverlayX = normalized;
+                _service.PersistSessionBestEffort();
             }
         }
     }
@@ -116,6 +122,7 @@ public sealed partial class DoubaoAgentViewModel
             if (SetProperty(ref _overlayY, normalized))
             {
                 _service.Session.OverlayY = normalized;
+                _service.PersistSessionBestEffort();
             }
         }
     }
@@ -129,6 +136,7 @@ public sealed partial class DoubaoAgentViewModel
             if (SetProperty(ref _overlayDurationMs, normalized))
             {
                 _service.Session.OverlayDurationMs = normalized;
+                _service.PersistSessionBestEffort();
             }
         }
     }
@@ -142,6 +150,7 @@ public sealed partial class DoubaoAgentViewModel
             if (SetProperty(ref _overlayRadius, normalized))
             {
                 _service.Session.OverlayRadius = normalized;
+                _service.PersistSessionBestEffort();
             }
         }
     }
@@ -157,6 +166,42 @@ public sealed partial class DoubaoAgentViewModel
                 NotifyCommandStates();
             }
         }
+    }
+
+    public string ArkApiKeyInput
+    {
+        get => _arkApiKeyInput;
+        set => SetProperty(ref _arkApiKeyInput, value ?? "");
+    }
+
+    public string AuthKeyInput
+    {
+        get => _authKeyInput;
+        set => SetProperty(ref _authKeyInput, value ?? "");
+    }
+
+    public string AuthApiKeyInput
+    {
+        get => _authApiKeyInput;
+        set => SetProperty(ref _authApiKeyInput, value ?? "");
+    }
+
+    public string PlannerApiBaseUrl
+    {
+        get => _plannerApiBaseUrl;
+        set => SetProperty(ref _plannerApiBaseUrl, value ?? "");
+    }
+
+    public string SettingsMessage
+    {
+        get => _settingsMessage;
+        private set => SetProperty(ref _settingsMessage, value);
+    }
+
+    public bool HasSettingsError
+    {
+        get => _hasSettingsError;
+        private set => SetProperty(ref _hasSettingsError, value);
     }
 
     public bool IsTaskRunning

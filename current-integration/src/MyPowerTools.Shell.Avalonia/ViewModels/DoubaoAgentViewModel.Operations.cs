@@ -172,6 +172,92 @@ public sealed partial class DoubaoAgentViewModel
         }
     }
 
+    private async Task SaveConfigurationAsync()
+    {
+        IsBusy = true;
+        HasSettingsError = false;
+        SettingsMessage = "正在保存配置…";
+        try
+        {
+            var saved = await _service.SaveConfigurationAsync(
+                new DoubaoAgentConfigurationUpdate(
+                    new DoubaoSecretUpdate(ArkApiKeyInput, AuthKeyInput, AuthApiKeyInput),
+                    PlannerApiBaseUrl),
+                CancellationToken.None);
+            if (!saved.Success)
+            {
+                HasSettingsError = true;
+                SettingsMessage = saved.Message;
+                _lastOperationDiagnostic = saved.TechnicalDetails;
+                return;
+            }
+
+            ArkApiKeyInput = "";
+            AuthKeyInput = "";
+            AuthApiKeyInput = "";
+
+            var current = await _service.LoadAsync();
+            DoubaoAgentOperationResult runtimeResult;
+            if (current.HasOwnedProcesses)
+            {
+                SettingsMessage = "配置已保存，正在重新启动服务…";
+                runtimeResult = await _service.RestartAsync();
+            }
+            else if (!current.AnyServiceOnline && current.RuntimeInstalled)
+            {
+                SettingsMessage = "配置已保存，正在启动服务…";
+                runtimeResult = await _service.StartAsync();
+            }
+            else
+            {
+                runtimeResult = new DoubaoAgentOperationResult(
+                    false,
+                    "配置已保存，但当前服务由外部进程托管，尚未应用新配置。请停止外部服务后再从 MyPowerTools 启动。",
+                    "external-runtime-not-restarted");
+            }
+
+            HasSettingsError = !runtimeResult.Success;
+            SettingsMessage = runtimeResult.Success
+                ? "配置已保存，服务状态已刷新。"
+                : runtimeResult.Message;
+            _lastOperationDiagnostic = runtimeResult.TechnicalDetails;
+            ApplySnapshot(await _service.LoadAsync());
+        }
+        catch (Exception ex)
+        {
+            HasSettingsError = true;
+            SettingsMessage = $"保存配置失败：{ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private async Task TestConfigurationAsync()
+    {
+        IsBusy = true;
+        HasSettingsError = false;
+        SettingsMessage = "正在测试 Planner 与模型 API…";
+        try
+        {
+            var result = await _service.TestConfigurationAsync();
+            HasSettingsError = !result.Success;
+            SettingsMessage = result.Message;
+            _lastOperationDiagnostic = result.TechnicalDetails;
+            ApplySnapshot(await _service.LoadAsync());
+        }
+        catch (Exception ex)
+        {
+            HasSettingsError = true;
+            SettingsMessage = $"连接测试失败：{ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
     private async Task AddTraceOnUiAsync(DoubaoAgentTaskEvent taskEvent)
     {
         if (Dispatcher.UIThread.CheckAccess())

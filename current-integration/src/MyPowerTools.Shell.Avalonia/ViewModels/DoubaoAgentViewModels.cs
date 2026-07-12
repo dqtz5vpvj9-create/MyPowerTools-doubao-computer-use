@@ -36,6 +36,12 @@ public sealed partial class DoubaoAgentViewModel : ToolProductPageViewModel, IDi
     private int _overlayY;
     private int _overlayDurationMs;
     private int _overlayRadius;
+    private string _arkApiKeyInput = "";
+    private string _authKeyInput = "";
+    private string _authApiKeyInput = "";
+    private string _plannerApiBaseUrl;
+    private string _settingsMessage = "输入新密钥后保存；已保存的密钥永远不会回显。";
+    private bool _hasSettingsError;
 
     public DoubaoAgentViewModel(DoubaoAgentSnapshot snapshot)
         : this(snapshot, new DoubaoAgentToolService(), ownsService: true)
@@ -67,6 +73,7 @@ public sealed partial class DoubaoAgentViewModel : ToolProductPageViewModel, IDi
         _overlayY = service.Session.OverlayY;
         _overlayDurationMs = service.Session.OverlayDurationMs;
         _overlayRadius = service.Session.OverlayRadius;
+        _plannerApiBaseUrl = service.Session.PlannerApiBaseUrl;
         _selectedModel = snapshot.Models.FirstOrDefault(model =>
             string.Equals(model.Name, service.Session.SelectedModelName, StringComparison.OrdinalIgnoreCase))
             ?? snapshot.Models.FirstOrDefault(model =>
@@ -98,6 +105,12 @@ public sealed partial class DoubaoAgentViewModel : ToolProductPageViewModel, IDi
             () => RunOverlayOperationAsync("self-test", token => _service.CallOverlayAsync(
                 "self-test", OverlayX, OverlayY, OverlayDurationMs, OverlayRadius, token)),
             () => CanUseOverlay);
+        SaveConfigurationCommand = new AsyncRelayCommand(
+            SaveConfigurationAsync,
+            () => !IsBusy && !IsTaskRunning);
+        TestConfigurationCommand = new AsyncRelayCommand(
+            TestConfigurationAsync,
+            () => !IsBusy && !IsTaskRunning && ArkApiKeyConfigured);
         ApplySnapshot(snapshot);
     }
 
@@ -112,6 +125,8 @@ public sealed partial class DoubaoAgentViewModel : ToolProductPageViewModel, IDi
     public ICommand ShowOverlayCommand { get; }
     public ICommand HideOverlayCommand { get; }
     public ICommand OverlaySelfTestCommand { get; }
+    public ICommand SaveConfigurationCommand { get; }
+    public ICommand TestConfigurationCommand { get; }
 
     public IReadOnlyList<DoubaoAgentServiceStatus> Services => _snapshot.Services;
     public IReadOnlyList<DoubaoAgentModel> Models => _snapshot.Models;
@@ -129,6 +144,12 @@ public sealed partial class DoubaoAgentViewModel : ToolProductPageViewModel, IDi
     public bool ToolServerOnline => Services.FirstOrDefault(service => service.Id == "tool")?.IsOnline ?? false;
     public bool PlannerOnline => Services.FirstOrDefault(service => service.Id == "planner")?.IsOnline ?? false;
     public bool McpServerOnline => Services.FirstOrDefault(service => service.Id == "mcp")?.IsOnline ?? false;
+    public bool ArkApiKeyConfigured => Configuration.ArkApiKeyConfigured;
+    public bool AuthKeyConfigured => Configuration.AuthKeyConfigured;
+    public bool AuthApiKeyConfigured => Configuration.AuthApiKeyConfigured;
+    public string ArkApiKeyStatus => ArkApiKeyConfigured ? "已配置" : "未配置";
+    public string AuthKeyStatus => AuthKeyConfigured ? "已配置" : "未配置";
+    public string AuthApiKeyStatus => AuthApiKeyConfigured ? "已配置" : "未配置";
     public bool HasTrace => Trace.Count > 0;
     public bool HasLogs => Logs.Count > 0;
     public bool HasRuntimeProcesses => RuntimeProcesses.Count > 0;
@@ -171,7 +192,9 @@ public sealed partial class DoubaoAgentViewModel : ToolProductPageViewModel, IDi
     public string OverlayDiagnosticText => string.IsNullOrWhiteSpace(_snapshot.Overlay.ExclusionMethod)
         ? "捕获排除方式未报告"
         : $"捕获排除：{_snapshot.Overlay.ExclusionMethod}{CaptureProtectionSuffix(_snapshot.Overlay.CaptureProtectionOk)}";
-    public string ConfigurationSummary => $"Tool 配置 {YesNo(Configuration.ToolConfigExists)} · Planner 配置 {YesNo(Configuration.PlannerConfigExists)} · 密钥文件 {YesNo(Configuration.SecretFileExists)}";
+    public string ConfigurationSummary =>
+        $"Tool 配置 {YesNo(Configuration.ToolConfigExists)} · Planner 配置 {YesNo(Configuration.PlannerConfigExists)} · " +
+        $"ARK {ArkApiKeyStatus} · Tool 认证 {AuthKeyStatus} · MCP 认证 {AuthApiKeyStatus}";
     public string ListenerSecurityText => RuntimeSecurity.Listeners.Count == 0
         ? RuntimeSecurity.Detail
         : string.Join(" · ", RuntimeSecurity.Listeners.Select(listener =>
