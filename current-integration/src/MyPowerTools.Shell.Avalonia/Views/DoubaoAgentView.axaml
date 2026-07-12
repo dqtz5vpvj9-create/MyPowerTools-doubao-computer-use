@@ -104,7 +104,7 @@
         <Grid ColumnDefinitions="22,*"
               ColumnSpacing="8">
           <TextBlock Text="&#xE7BA;"
-                     FontFamily="Segoe Fluent Icons"
+                     FontFamily="{DynamicResource MptFontFamilyIcons}"
                      Foreground="{DynamicResource MptBrushWarning}" />
           <TextBlock Grid.Column="1"
                      Text="本机缺少豆包 Computer Use 运行时，启动、任务执行和屏幕标记功能当前不可用。"
@@ -117,7 +117,7 @@
         <Grid ColumnDefinitions="22,*"
               ColumnSpacing="8">
           <TextBlock Text="&#xE72E;"
-                     FontFamily="Segoe Fluent Icons"
+                     FontFamily="{DynamicResource MptFontFamilyIcons}"
                      Foreground="{DynamicResource MptBrushWarning}" />
           <StackPanel Grid.Column="1"
                       Spacing="{DynamicResource MptSpacingXs}">
@@ -135,7 +135,7 @@
         <Grid ColumnDefinitions="22,*"
               ColumnSpacing="8">
           <TextBlock Text="&#xE7BA;"
-                     FontFamily="Segoe Fluent Icons"
+                     FontFamily="{DynamicResource MptFontFamilyIcons}"
                      Foreground="{DynamicResource MptBrushDanger}" />
           <StackPanel Grid.Column="1"
                       Spacing="{DynamicResource MptSpacingXs}">
@@ -448,7 +448,7 @@
                               Spacing="{DynamicResource MptSpacingS}"
                               IsVisible="{Binding !HasLatestScreenshot}">
                     <TextBlock Text="&#xE722;"
-                               FontFamily="Segoe Fluent Icons"
+                               FontFamily="{DynamicResource MptFontFamilyIcons}"
                                FontSize="{DynamicResource MptFontSizeTitle}"
                                Foreground="{DynamicResource MptBrushTextMuted}"
                                HorizontalAlignment="Center" />
