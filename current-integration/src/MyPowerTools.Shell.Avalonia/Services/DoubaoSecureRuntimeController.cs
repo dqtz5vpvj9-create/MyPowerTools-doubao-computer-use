@@ -57,6 +57,7 @@ public sealed class DoubaoSecureRuntimeController : IDoubaoSecureRuntimeControll
 {
     public static readonly int[] ServicePorts = [38102, 38080, 38189];
 
+    private const string DataRootEnvironmentVariable = "DOUBAO_COMPUTER_USE_DATA_ROOT";
     private const int ErrorInsufficientBuffer = 122;
     private const int AddressFamilyInet = 2;
     private const int AddressFamilyInet6 = 23;
@@ -532,7 +533,7 @@ public sealed class DoubaoSecureRuntimeController : IDoubaoSecureRuntimeControll
 
     private Process StartProcess(RuntimeProcessSpecification specification)
     {
-        Directory.CreateDirectory(Path.Combine(specification.RuntimeRoot, "logs"));
+        Directory.CreateDirectory(ResolveLogsDirectory(specification.RuntimeRoot));
         var startInfo = new ProcessStartInfo
         {
             FileName = specification.ExecutablePath,
@@ -590,7 +591,7 @@ public sealed class DoubaoSecureRuntimeController : IDoubaoSecureRuntimeControll
         var mcpSourceDirectory = Path.Combine(mcpDirectory, "src");
         var plannerDirectory = Path.Combine(runtimeRoot, "planner");
         var plannerAppDirectory = Path.Combine(plannerDirectory, "src", "planner");
-        var logsDirectory = Path.Combine(runtimeRoot, "logs");
+        var logsDirectory = ResolveLogsDirectory(runtimeRoot);
 
         return
         [
@@ -1024,11 +1025,34 @@ public sealed class DoubaoSecureRuntimeController : IDoubaoSecureRuntimeControll
         return unchecked((ushort)IPAddress.NetworkToHostOrder(unchecked((short)(port & 0xffff))));
     }
 
+    internal static string ResolveWritableDataRoot()
+    {
+        var configuredRoot = Environment.GetEnvironmentVariable(DataRootEnvironmentVariable);
+        if (!string.IsNullOrWhiteSpace(configuredRoot))
+        {
+            return Path.GetFullPath(Environment.ExpandEnvironmentVariables(configuredRoot));
+        }
+
+        var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        if (string.IsNullOrWhiteSpace(localAppData))
+        {
+            localAppData = Path.GetTempPath();
+        }
+
+        return Path.Combine(localAppData, "MyPowerTools", "Doubao");
+    }
+
+    internal static string ResolveLogsDirectory(string runtimeRoot)
+    {
+        _ = runtimeRoot;
+        return Path.Combine(ResolveWritableDataRoot(), "logs");
+    }
+
     private static string StatePath(string runtimeRoot) =>
-        Path.Combine(Path.GetFullPath(runtimeRoot), "logs", "mypowertools-secure-runtime.json");
+        Path.Combine(ResolveLogsDirectory(runtimeRoot), "mypowertools-secure-runtime.json");
 
     private static string LegacyStatePath(string runtimeRoot) =>
-        Path.Combine(Path.GetFullPath(runtimeRoot), "logs", "local-computer-use.pids.json");
+        Path.Combine(ResolveLogsDirectory(runtimeRoot), "local-computer-use.pids.json");
 
     private static OwnedRuntimeState? LoadState(string runtimeRoot)
     {
