@@ -174,7 +174,7 @@ public sealed partial class DoubaoAgentViewModel
         {
             $"运行目录: {RuntimeRoot}",
             $"密钥文件: {Configuration.SecretFilePath} ({(SecretConfigured ? "已配置" : "缺失或为空")})",
-            $"日志目录: {Path.Combine(RuntimeRoot, "logs")}",
+            $"日志目录: {DoubaoSecureRuntimeController.ResolveLogsDirectory(RuntimeRoot)}",
             $"配置: {ConfigurationSummary}",
             $"端口状态: {(RuntimeSecurity.InspectionAvailable ? "已读取" : "读取失败")} / {ListenerSecurityText}",
             $"受控进程: {(HasOwnedProcesses ? "已验证" : "无")}"

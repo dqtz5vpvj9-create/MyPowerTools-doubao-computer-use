@@ -525,7 +525,7 @@ public sealed class DoubaoAgentToolService : IDisposable
 
     private IReadOnlyList<DoubaoAgentLogFile> ReadLogFiles()
     {
-        var logsDirectory = Path.Combine(RuntimeRoot, "logs");
+        var logsDirectory = DoubaoSecureRuntimeController.ResolveLogsDirectory(RuntimeRoot);
         if (!Directory.Exists(logsDirectory))
         {
             return [];
@@ -559,7 +559,9 @@ public sealed class DoubaoAgentToolService : IDisposable
         IReadOnlyList<DoubaoAgentServiceStatus> services,
         DoubaoRuntimeSecurityState security)
     {
-        var statePath = Path.Combine(RuntimeRoot, "logs", "mypowertools-secure-runtime.json");
+        var statePath = Path.Combine(
+            DoubaoSecureRuntimeController.ResolveLogsDirectory(RuntimeRoot),
+            "mypowertools-secure-runtime.json");
         var owned = security.VerifiedOwnedProcesses;
         if (owned.Count == 0)
         {
@@ -588,7 +590,7 @@ public sealed class DoubaoAgentToolService : IDisposable
             File.Exists(Path.Combine(RuntimeRoot, "tool_server", "config.toml")),
             File.Exists(Path.Combine(RuntimeRoot, "planner", "config.toml")),
             File.Exists(envPath),
-            Directory.Exists(Path.Combine(RuntimeRoot, "logs")),
+            Directory.Exists(DoubaoSecureRuntimeController.ResolveLogsDirectory(RuntimeRoot)),
             envPath);
     }
 
