@@ -58,10 +58,19 @@ public sealed partial class DoubaoAgentViewModel : MyPowerTools.AvaloniaSdk.Tool
     {
     }
 
-    private DoubaoAgentViewModel(
+    public DoubaoAgentViewModel(
         DoubaoAgentSnapshot snapshot,
         DoubaoAgentToolService service,
         bool ownsService)
+        : this(snapshot, service, ownsService, initialize: true)
+    {
+    }
+
+    private DoubaoAgentViewModel(
+        DoubaoAgentSnapshot snapshot,
+        DoubaoAgentToolService service,
+        bool ownsService,
+        bool initialize = true)
         : base(
             "豆包 Computer Use",
             "用自然语言交给豆包视觉代理执行本机电脑任务",

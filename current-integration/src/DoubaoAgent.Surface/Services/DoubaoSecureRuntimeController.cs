@@ -1031,6 +1031,10 @@ public sealed class DoubaoSecureRuntimeController : IDoubaoSecureRuntimeControll
     internal static string ResolveWritableDataRoot()
     {
         var configuredRoot = Environment.GetEnvironmentVariable(DataRootEnvironmentVariable);
+        if (string.IsNullOrWhiteSpace(configuredRoot))
+        {
+            configuredRoot = Environment.GetEnvironmentVariable("MPT_TOOL_DATA_ROOT");
+        }
         if (!string.IsNullOrWhiteSpace(configuredRoot))
         {
             return Path.GetFullPath(Environment.ExpandEnvironmentVariables(configuredRoot));

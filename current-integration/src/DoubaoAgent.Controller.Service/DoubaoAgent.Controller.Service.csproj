@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>DoubaoAgent.Controller.Service</AssemblyName>
+    <RootNamespace>DoubaoAgent.Controller.Service</RootNamespace>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Description>
+      Doubao Computer Use controller Service Unit process, supervised by MyPowerTools.ServiceManager.
+      Owns the secure runtime controller (launch/stop/restart/identity-validate of the Planner,
+      Tool Runtime and MCP Bridge subprocesses), the health/readiness probe fan-out and a
+      crash-watchdog — all with a life independent of the Shell and the Runner. Shell/Runner
+      restarts never end this process or the Python children it supervises. Provides a named-pipe
+      readiness probe, a status snapshot over the control pipe and a heartbeat so the
+      ServiceManager can confirm liveness and re-adopt the still-running process across its
+      own restart.
+    </Description>
+  </PropertyGroup>
+
+  <!-- The worker reuses the real secure-runtime controller (no duplication of the Win32 process
+       identity / loopback listener / launch-spec logic). DoubaoSecureRuntimeController.cs is
+       self-contained: it imports only System.* namespaces. The operation-result record it returns
+       is provided locally via OperationResultShim.cs (same shape as the Surface type, same
+       namespace) so the linked source compiles unmodified. -->
+  <ItemGroup>
+    <Compile Include="..\DoubaoAgent.Surface\Services\DoubaoSecureRuntimeController.cs"
+             Link="Shared\DoubaoSecureRuntimeController.cs" />
+  </ItemGroup>
+
+</Project>

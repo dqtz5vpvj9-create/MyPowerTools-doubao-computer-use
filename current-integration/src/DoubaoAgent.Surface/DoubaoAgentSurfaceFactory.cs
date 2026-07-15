@@ -18,9 +18,12 @@ public sealed class DoubaoAgentSurfaceFactory : IMptAvaloniaSurfaceFactory
 {
     public Control CreateSurface(MptAvaloniaSurfaceContext context)
     {
-        var tools = new DoubaoAgentToolService();
+        var controller = new DoubaoServiceUnitRuntimeController(context.ServiceUnits);
+        var tools = new DoubaoAgentToolService(
+            runtimeController: controller,
+            settingsFilePath: Path.Combine(context.DataDirectory, "settings.json"));
         var snapshot = tools.CurrentSnapshot;
-        var viewModel = new DoubaoAgentViewModel(snapshot, tools);
+        var viewModel = new DoubaoAgentViewModel(snapshot, tools, ownsService: true);
 
         Info(context, "豆包 Computer Use 已打开，状态正在后台更新。");
         return new DoubaoAgentView { DataContext = viewModel };

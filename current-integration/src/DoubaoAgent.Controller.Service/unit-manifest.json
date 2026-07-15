@@ -1,0 +1,31 @@
+{
+  "id": "doubao-agent.controller.service",
+  "toolId": "doubao-agent",
+  "displayName": "Doubao Computer Use Controller",
+  "exec": "DoubaoAgent.Controller.Service.exe",
+  "arguments": [
+    "--pipe",
+    "mypowertools.doubao-agent.controller",
+    "--heartbeat-file",
+    "%LOCALAPPDATA%/MyPowerTools/state/doubao-agent-controller.heartbeat",
+    "--instance-token",
+    "doubao-agent-controller-v1",
+    "--probe-interval-ms",
+    "3000"
+  ],
+  "workingDirectory": "",
+  "environment": {
+    "DoubaoAgent__Transport": "pipe",
+    "DoubaoAgent__NamedPipe__Name": "mypowertools.doubao-agent.controller",
+    "MPT_TOOL_DATA_ROOT": "%LOCALAPPDATA%/MyPowerTools/state/tools/doubao-agent"
+  },
+  "autostart": true,
+  "restartPolicy": { "maxRestarts": 4, "backoffMs": 2000 },
+  "readiness": { "kind": "pipe", "address": "mypowertools.doubao-agent.controller", "timeoutMs": 8000 },
+  "stopTimeoutMs": 10000,
+  "dataRoots": [
+    "%LOCALAPPDATA%/MyPowerTools/state/tools/doubao-agent"
+  ],
+  "dependsOn": [],
+  "instanceToken": "doubao-agent-controller-v1"
+}

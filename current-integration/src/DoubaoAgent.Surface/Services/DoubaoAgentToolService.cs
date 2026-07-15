@@ -46,9 +46,11 @@ public sealed partial class DoubaoAgentToolService : IDisposable
     private readonly Func<string, int, CancellationToken, Task<bool>>? _tcpProbeOverride;
     private readonly TimeSpan _shutdownReadyTimeout;
     private readonly IDoubaoSecureRuntimeController _runtimeController;
+    private readonly IDoubaoRuntimeSnapshotProvider? _runtimeSnapshotProvider;
     private readonly bool _ownsRuntimeController;
     private readonly object _snapshotGate = new();
     private readonly object _refreshGate = new();
+    private readonly string _dataRoot;
     private DoubaoAgentSnapshot _currentSnapshot = null!;
     private Task<DoubaoAgentSnapshot>? _refreshTask;
     private long _snapshotRevision;
@@ -72,8 +74,11 @@ public sealed partial class DoubaoAgentToolService : IDisposable
         _tcpProbeOverride = tcpProbe;
         _shutdownReadyTimeout = shutdownReadyTimeout ?? TimeSpan.FromSeconds(10);
         _runtimeController = runtimeController ?? new DoubaoSecureRuntimeController();
+        _runtimeSnapshotProvider = _runtimeController as IDoubaoRuntimeSnapshotProvider;
         _ownsRuntimeController = runtimeController is null;
         _settingsFilePath = Path.GetFullPath(settingsFilePath ?? ResolveSettingsFilePath());
+        _dataRoot = Path.GetDirectoryName(_settingsFilePath)
+            ?? DoubaoSecureRuntimeController.ResolveWritableDataRoot();
         Session = LoadSessionState();
         _currentSnapshot = CreateInitialSnapshot();
     }
@@ -147,6 +152,11 @@ public sealed partial class DoubaoAgentToolService : IDisposable
             IsRefreshing = true
         });
 
+        if (_runtimeSnapshotProvider is not null)
+        {
+            return await RefreshFromControllerAsync(configuration, cancellationToken).ConfigureAwait(false);
+        }
+
         var securityTask = _runtimeController.InspectAsync(RuntimeRoot, cancellationToken);
         var toolTask = ProbeJsonAsync(new Uri(_toolServer, "/config"), cancellationToken);
         var plannerTask = ProbeJsonAsync(new Uri(_planner, "/health"), cancellationToken);
@@ -179,6 +189,88 @@ public sealed partial class DoubaoAgentToolService : IDisposable
             throw;
         }
     }
+
+    private async Task<DoubaoAgentSnapshot> RefreshFromControllerAsync(
+        DoubaoAgentConfigurationState configuration,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var controller = await _runtimeSnapshotProvider!
+                .GetCachedSnapshotAsync(cancellationToken)
+                .ConfigureAwait(false);
+            var security = new DoubaoRuntimeSecurityState(
+                controller.SecuritySafe,
+                controller.Listeners,
+                controller.OwnedProcesses.Any(process => process.IsValidated),
+                controller.SecurityDetail,
+                controller.OwnedProcesses);
+            if (!security.IsSafe)
+            {
+                Session.AutoStartEnabled = false;
+            }
+
+            var services = new[]
+            {
+                CachedService("planner", "Agent Planner", _planner.ToString().TrimEnd('/'), controller.PlannerOnline, controller.CheckedAt),
+                CachedService("tool", "Tool Server", _toolServer.ToString().TrimEnd('/'), controller.ToolOnline, controller.CheckedAt),
+                CachedService("mcp", "MCP Server", _mcpServer.ToString(), controller.McpOnline, controller.CheckedAt)
+            };
+            return PublishSnapshot(snapshot => snapshot with
+            {
+                RuntimeRoot = string.IsNullOrWhiteSpace(controller.RuntimeRoot) ? RuntimeRoot : controller.RuntimeRoot,
+                RuntimeInstalled = RuntimeFilesAvailable(),
+                SecretConfigured = configuration.ArkApiKeyConfigured,
+                Configuration = configuration,
+                Logs = ReadLogFiles(),
+                Services = services,
+                Security = security,
+                Runtime = ReadProcessState(services, security),
+                CheckedAt = controller.CheckedAt == DateTimeOffset.MinValue
+                    ? DateTimeOffset.Now
+                    : controller.CheckedAt.ToLocalTime(),
+                IsRefreshing = false
+            });
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            PublishSnapshot(snapshot => snapshot with { IsRefreshing = false });
+            throw;
+        }
+        catch (Exception exception)
+        {
+            var security = DoubaoRuntimeSecurityState.Unverified(
+                $"豆包 Controller Service Unit 不可用：{exception.Message}");
+            return PublishSnapshot(snapshot => snapshot with
+            {
+                RuntimeInstalled = RuntimeFilesAvailable(),
+                SecretConfigured = configuration.ArkApiKeyConfigured,
+                Configuration = configuration,
+                Logs = ReadLogFiles(),
+                Security = security,
+                Runtime = new DoubaoAgentRuntimeState(null, false, []),
+                CheckedAt = DateTimeOffset.Now,
+                IsRefreshing = false
+            });
+        }
+    }
+
+    private static DoubaoAgentServiceStatus CachedService(
+        string id,
+        string displayName,
+        string endpoint,
+        bool online,
+        DateTimeOffset checkedAt) =>
+        new(
+            id,
+            displayName,
+            endpoint,
+            online,
+            online
+                ? $"Controller 缓存 · {checkedAt.ToLocalTime():HH:mm:ss}"
+                : $"未连接 · Controller {checkedAt.ToLocalTime():HH:mm:ss}",
+            null,
+            0);
 
     private async Task PublishSecurityAsync(Task<DoubaoRuntimeSecurityState> securityTask)
     {
@@ -694,7 +786,7 @@ public sealed partial class DoubaoAgentToolService : IDisposable
 
     private IReadOnlyList<DoubaoAgentLogFile> ReadLogFiles()
     {
-        var logsDirectory = DoubaoSecureRuntimeController.ResolveLogsDirectory(RuntimeRoot);
+        var logsDirectory = Path.Combine(_dataRoot, "logs");
         if (!Directory.Exists(logsDirectory))
         {
             return [];
@@ -729,7 +821,7 @@ public sealed partial class DoubaoAgentToolService : IDisposable
         DoubaoRuntimeSecurityState security)
     {
         var statePath = Path.Combine(
-            DoubaoSecureRuntimeController.ResolveLogsDirectory(RuntimeRoot),
+            Path.Combine(_dataRoot, "logs"),
             "mypowertools-secure-runtime.json");
         var owned = security.VerifiedOwnedProcesses;
         if (owned.Count == 0)
@@ -760,7 +852,7 @@ public sealed partial class DoubaoAgentToolService : IDisposable
             File.Exists(Path.Combine(RuntimeRoot, "tool_server", "config.toml")),
             File.Exists(Path.Combine(RuntimeRoot, "planner", "config.toml")),
             File.Exists(envPath),
-            Directory.Exists(DoubaoSecureRuntimeController.ResolveLogsDirectory(RuntimeRoot)),
+            Directory.Exists(Path.Combine(_dataRoot, "logs")),
             envPath,
             secrets.ArkApiKeyConfigured,
             secrets.AuthKeyConfigured,
