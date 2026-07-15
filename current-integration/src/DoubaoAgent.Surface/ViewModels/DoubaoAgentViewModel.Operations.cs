@@ -1,8 +1,8 @@
 using System.Diagnostics;
 using Avalonia.Threading;
-using MyPowerTools.Shell.Avalonia.Services;
+using DoubaoAgent.Surface.Services;
 
-namespace MyPowerTools.Shell.Avalonia.ViewModels;
+namespace DoubaoAgent.Surface.ViewModels;
 
 public sealed partial class DoubaoAgentViewModel
 {

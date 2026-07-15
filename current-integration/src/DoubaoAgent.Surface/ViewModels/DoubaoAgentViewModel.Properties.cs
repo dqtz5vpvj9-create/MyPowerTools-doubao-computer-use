@@ -1,7 +1,7 @@
 using Avalonia.Media.Imaging;
-using MyPowerTools.Shell.Avalonia.Services;
+using DoubaoAgent.Surface.Services;
 
-namespace MyPowerTools.Shell.Avalonia.ViewModels;
+namespace DoubaoAgent.Surface.ViewModels;
 
 public sealed partial class DoubaoAgentViewModel
 {

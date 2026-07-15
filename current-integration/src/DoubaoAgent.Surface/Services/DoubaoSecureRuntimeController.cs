@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace MyPowerTools.Shell.Avalonia.Services;
+namespace DoubaoAgent.Surface.Services;
 
 public interface IDoubaoSecureRuntimeController : IDisposable
 {

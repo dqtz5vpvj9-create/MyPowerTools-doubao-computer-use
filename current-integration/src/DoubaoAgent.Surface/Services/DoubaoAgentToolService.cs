@@ -8,7 +8,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 
-namespace MyPowerTools.Shell.Avalonia.Services;
+namespace DoubaoAgent.Surface.Services;
 
 public sealed partial class DoubaoAgentToolService : IDisposable
 {

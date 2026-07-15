@@ -1,8 +1,9 @@
 using System.Text.Json;
 using Avalonia.Media.Imaging;
-using MyPowerTools.Shell.Avalonia.Services;
+using DoubaoAgent.Surface.Services;
 
-namespace MyPowerTools.Shell.Avalonia.ViewModels;
+using MyPowerTools.AvaloniaSdk;
+namespace DoubaoAgent.Surface.ViewModels;
 
 public sealed partial class DoubaoAgentViewModel
 {
@@ -28,7 +29,7 @@ public sealed partial class DoubaoAgentViewModel
             ?? snapshot.Models.FirstOrDefault(model =>
                 string.Equals(model.Name, DoubaoAgentToolService.PreferredDefaultModelName, StringComparison.OrdinalIgnoreCase))
             ?? snapshot.Models.FirstOrDefault();
-        SetProductState(ToolProductState.Ready);
+        SetProductState(MyPowerTools.AvaloniaSdk.ToolSurfaceState.Ready);
         NotifyRuntimeProperties();
         NotifyCommandStates();
     }
@@ -63,7 +64,7 @@ public sealed partial class DoubaoAgentViewModel
             RefreshCommand, StartRuntimeCommand, StopRuntimeCommand, RestartRuntimeCommand,
             RunTaskCommand, StopTaskCommand, ClearTraceCommand, ShowOverlayCommand, HideOverlayCommand,
             OverlaySelfTestCommand, SaveConfigurationCommand, TestConfigurationCommand
-        }.OfType<AsyncRelayCommand>())
+        }.OfType<MptAsyncRelayCommand>())
         {
             command.NotifyCanExecuteChanged();
         }

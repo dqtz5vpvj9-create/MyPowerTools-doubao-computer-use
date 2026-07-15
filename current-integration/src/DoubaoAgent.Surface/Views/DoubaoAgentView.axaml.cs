@@ -1,8 +1,8 @@
 using Avalonia;
 using Avalonia.Controls;
-using MyPowerTools.Shell.Avalonia.ViewModels;
+using DoubaoAgent.Surface.ViewModels;
 
-namespace MyPowerTools.Shell.Avalonia.Views;
+namespace DoubaoAgent.Surface.Views;
 
 public sealed partial class DoubaoAgentView : UserControl
 {

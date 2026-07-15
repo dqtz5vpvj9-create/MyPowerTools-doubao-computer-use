@@ -1,9 +1,9 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:controls="using:MyPowerTools.UI.Controls"
-             xmlns:services="using:MyPowerTools.Shell.Avalonia.Services"
-             xmlns:vm="using:MyPowerTools.Shell.Avalonia.ViewModels"
-             x:Class="MyPowerTools.Shell.Avalonia.Views.DoubaoAgentView"
+             xmlns:services="using:DoubaoAgent.Surface.Services"
+             xmlns:vm="using:DoubaoAgent.Surface.ViewModels"
+             x:Class="DoubaoAgent.Surface.Views.DoubaoAgentView"
              x:DataType="vm:DoubaoAgentViewModel">
   <UserControl.Styles>
     <Style Selector="Ellipse.running">

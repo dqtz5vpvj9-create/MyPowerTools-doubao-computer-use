@@ -4,11 +4,12 @@ using System.Text.Json;
 using System.Windows.Input;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
-using MyPowerTools.Shell.Avalonia.Services;
+using DoubaoAgent.Surface.Services;
 
-namespace MyPowerTools.Shell.Avalonia.ViewModels;
+using MyPowerTools.AvaloniaSdk;
+namespace DoubaoAgent.Surface.ViewModels;
 
-public sealed partial class DoubaoAgentViewModel : ToolProductPageViewModel, IDisposable
+public sealed partial class DoubaoAgentViewModel : MyPowerTools.AvaloniaSdk.ToolSurfacePageViewModel, IDisposable
 {
     public const int MaxTraceItems = 64;
     private readonly DoubaoAgentToolService _service;
@@ -64,7 +65,7 @@ public sealed partial class DoubaoAgentViewModel : ToolProductPageViewModel, IDi
         : base(
             "豆包 Computer Use",
             "用自然语言交给豆包视觉代理执行本机电脑任务",
-            ToolProductState.Ready)
+            MyPowerTools.AvaloniaSdk.ToolSurfaceState.Ready)
     {
         _snapshot = snapshot;
         _service = service;
@@ -85,34 +86,34 @@ public sealed partial class DoubaoAgentViewModel : ToolProductPageViewModel, IDi
             ?? snapshot.Models.FirstOrDefault();
         Trace = new ObservableCollection<DoubaoAgentTraceItemViewModel>();
 
-        RefreshCommand = new AsyncRelayCommand(RefreshAsync, () => !IsBusy && !IsTaskRunning);
-        StartRuntimeCommand = new AsyncRelayCommand(
+        RefreshCommand = new MptAsyncRelayCommand(RefreshAsync, () => !IsBusy && !IsTaskRunning);
+        StartRuntimeCommand = new MptAsyncRelayCommand(
             () => RunRuntimeOperationAsync(_service.StartAsync),
             () => CanStartRuntime);
-        StopRuntimeCommand = new AsyncRelayCommand(
+        StopRuntimeCommand = new MptAsyncRelayCommand(
             StopRuntimeAsync,
             () => CanStopRuntime);
-        RestartRuntimeCommand = new AsyncRelayCommand(
+        RestartRuntimeCommand = new MptAsyncRelayCommand(
             () => RunRuntimeOperationAsync(_service.RestartAsync),
             () => CanRestartRuntime);
-        RunTaskCommand = new AsyncRelayCommand(RunTaskAsync, () => CanRunTask);
-        StopTaskCommand = new AsyncRelayCommand(StopTaskAsync, () => IsTaskRunning);
-        ClearTraceCommand = new AsyncRelayCommand(ClearTraceAsync, () => Trace.Count > 0 || LatestScreenshot is not null);
-        ShowOverlayCommand = new AsyncRelayCommand(
+        RunTaskCommand = new MptAsyncRelayCommand(RunTaskAsync, () => CanRunTask);
+        StopTaskCommand = new MptAsyncRelayCommand(StopTaskAsync, () => IsTaskRunning);
+        ClearTraceCommand = new MptAsyncRelayCommand(ClearTraceAsync, () => Trace.Count > 0 || LatestScreenshot is not null);
+        ShowOverlayCommand = new MptAsyncRelayCommand(
             () => RunOverlayOperationAsync("show", token => _service.CallOverlayAsync(
                 "show", OverlayX, OverlayY, OverlayDurationMs, OverlayRadius, token)),
             () => CanUseOverlay);
-        HideOverlayCommand = new AsyncRelayCommand(
+        HideOverlayCommand = new MptAsyncRelayCommand(
             () => RunOverlayOperationAsync("hide", _service.HideOverlayAsync),
             () => CanUseOverlay);
-        OverlaySelfTestCommand = new AsyncRelayCommand(
+        OverlaySelfTestCommand = new MptAsyncRelayCommand(
             () => RunOverlayOperationAsync("self-test", token => _service.CallOverlayAsync(
                 "self-test", OverlayX, OverlayY, OverlayDurationMs, OverlayRadius, token)),
             () => CanUseOverlay);
-        SaveConfigurationCommand = new AsyncRelayCommand(
+        SaveConfigurationCommand = new MptAsyncRelayCommand(
             SaveConfigurationAsync,
             () => !IsBusy && !IsTaskRunning);
-        TestConfigurationCommand = new AsyncRelayCommand(
+        TestConfigurationCommand = new MptAsyncRelayCommand(
             TestConfigurationAsync,
             () => !IsBusy && !IsTaskRunning && ArkApiKeyConfigured);
         ApplySnapshot(snapshot);
