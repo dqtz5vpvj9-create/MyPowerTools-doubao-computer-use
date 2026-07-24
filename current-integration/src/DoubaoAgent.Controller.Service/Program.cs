@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text.Json;
 using DoubaoAgent.Surface.Services;
+using MyPowerTools.Ipc;
 
 // Doubao Agent Controller Service Unit — supervised by MyPowerTools.ServiceManager.
 //
@@ -182,12 +183,7 @@ static async Task ServeControlPipe(
         NamedPipeServerStream? server = null;
         try
         {
-            server = new NamedPipeServerStream(
-                name,
-                PipeDirection.InOut,
-                NamedPipeServerStream.MaxAllowedServerInstances,
-                PipeTransmissionMode.Byte,
-                PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly);
+            server = MptNamedPipePolicy.CreateServer(name);
             await server.WaitForConnectionAsync(cancellationToken);
 
             while (server.IsConnected && !cancellationToken.IsCancellationRequested)

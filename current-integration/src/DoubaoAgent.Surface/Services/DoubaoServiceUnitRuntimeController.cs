@@ -163,7 +163,7 @@ public sealed class DoubaoServiceUnitRuntimeController :
             ".",
             pipeName,
             PipeDirection.InOut,
-            PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly);
+            PipeOptions.Asynchronous);
         await pipe.ConnectAsync(timeout.Token).ConfigureAwait(false);
 
         var request = new Dictionary<string, object?>(StringComparer.Ordinal)

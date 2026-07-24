@@ -30,4 +30,8 @@
              Link="Shared\DoubaoSecureRuntimeController.cs" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\..\src\MyPowerTools.Ipc.Shared\MyPowerTools.Ipc.Shared.csproj" />
+  </ItemGroup>
+
 </Project>
