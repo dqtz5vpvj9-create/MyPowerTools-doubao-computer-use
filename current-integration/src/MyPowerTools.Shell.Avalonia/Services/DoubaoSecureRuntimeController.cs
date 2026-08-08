@@ -241,14 +241,9 @@ public sealed class DoubaoSecureRuntimeController : IDoubaoSecureRuntimeControll
 
         try
         {
-            foreach (var serviceName in new[] { "tool_server", "mcp_server", "planner" })
+            var configPath = Path.Combine(fullRuntimeRoot, ".venv", "pyvenv.cfg");
+            if (File.Exists(configPath))
             {
-                var configPath = Path.Combine(fullRuntimeRoot, serviceName, ".venv", "pyvenv.cfg");
-                if (!File.Exists(configPath))
-                {
-                    continue;
-                }
-
                 var lines = File.ReadAllLines(configPath).ToList();
                 var homeIndex = lines.FindIndex(line =>
                     line.StartsWith("home = ", StringComparison.OrdinalIgnoreCase));
@@ -256,7 +251,7 @@ public sealed class DoubaoSecureRuntimeController : IDoubaoSecureRuntimeControll
                 if (homeIndex >= 0 &&
                     string.Equals(lines[homeIndex], expectedLine, StringComparison.OrdinalIgnoreCase))
                 {
-                    continue;
+                    return null;
                 }
 
                 if (homeIndex >= 0)
@@ -429,16 +424,16 @@ public sealed class DoubaoSecureRuntimeController : IDoubaoSecureRuntimeControll
         {
             new LegacyProcessSpecification(
                 "tool", state.ToolPort, state.ToolWrapperPid, state.ToolServerPid,
-                Path.Combine(runtimeRoot, "tool_server", ".venv", "Scripts", "python.exe"),
+                Path.Combine(runtimeRoot, ".venv", "Scripts", "python.exe"),
                 ["main.py"], ["main.py"]),
             new LegacyProcessSpecification(
                 "mcp", state.McpPort, state.McpWrapperPid, state.McpServerPid,
-                Path.Combine(runtimeRoot, "mcp_server", ".venv", "Scripts", "mcp-server.exe"),
+                Path.Combine(runtimeRoot, ".venv", "Scripts", "mcp-server.exe"),
                 ["--transport", "sse"],
-                [Path.Combine(runtimeRoot, "mcp_server", ".venv", "Scripts", "mcp-server.exe"), "--transport", "sse"]),
+                [Path.Combine(runtimeRoot, ".venv", "Scripts", "mcp-server.exe"), "--transport", "sse"]),
             new LegacyProcessSpecification(
                 "planner", state.PlannerPort, state.PlannerWrapperPid, state.PlannerPid,
-                Path.Combine(runtimeRoot, "planner", ".venv", "Scripts", "python.exe"),
+                Path.Combine(runtimeRoot, ".venv", "Scripts", "python.exe"),
                 ["-m", "uvicorn", "app:app", "--host", "0.0.0.0", "--port", "38189"],
                 ["-m", "uvicorn", "app:app", "--host", "0.0.0.0", "--port", "38189"])
         };
@@ -605,7 +600,7 @@ public sealed class DoubaoSecureRuntimeController : IDoubaoSecureRuntimeControll
             new RuntimeProcessSpecification(
                 "tool",
                 runtimeRoot,
-                Path.Combine(toolDirectory, ".venv", "Scripts", "python.exe"),
+                Path.Combine(runtimeRoot, ".venv", "Scripts", "python.exe"),
                 Path.Combine(toolDirectory, "main.py"),
                 toolDirectory,
                 ["-m", "uvicorn", "main:app", "--host", "127.0.0.1", "--port", "38102"],
@@ -617,7 +612,7 @@ public sealed class DoubaoSecureRuntimeController : IDoubaoSecureRuntimeControll
             new RuntimeProcessSpecification(
                 "mcp",
                 runtimeRoot,
-                Path.Combine(mcpDirectory, ".venv", "Scripts", "python.exe"),
+                Path.Combine(runtimeRoot, ".venv", "Scripts", "python.exe"),
                 Path.Combine(mcpDirectory, "src", "mcp_server", "main.py"),
                 mcpDirectory,
                 ["-m", "mcp_server.main", "--transport", "sse"],
@@ -633,7 +628,7 @@ public sealed class DoubaoSecureRuntimeController : IDoubaoSecureRuntimeControll
             new RuntimeProcessSpecification(
                 "planner",
                 runtimeRoot,
-                Path.Combine(plannerDirectory, ".venv", "Scripts", "python.exe"),
+                Path.Combine(runtimeRoot, ".venv", "Scripts", "python.exe"),
                 Path.Combine(plannerAppDirectory, "app.py"),
                 plannerAppDirectory,
                 ["-m", "uvicorn", "app:app", "--host", "127.0.0.1", "--port", "38189"],

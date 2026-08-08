@@ -672,12 +672,12 @@ public sealed partial class DoubaoAgentToolService : IDisposable
 
     private bool RuntimeFilesAvailable()
     {
-        return File.Exists(Path.Combine(RuntimeRoot, "tool_server", ".venv", "Scripts", "python.exe")) &&
+        return File.Exists(Path.Combine(RuntimeRoot, ".venv", "Scripts", "python.exe")) &&
                File.Exists(Path.Combine(RuntimeRoot, "tool_server", "main.py")) &&
                File.Exists(Path.Combine(RuntimeRoot, "tool_server", "config.toml")) &&
-               File.Exists(Path.Combine(RuntimeRoot, "mcp_server", ".venv", "Scripts", "python.exe")) &&
+               File.Exists(Path.Combine(RuntimeRoot, ".venv", "Scripts", "mcp-server.exe")) &&
                File.Exists(Path.Combine(RuntimeRoot, "mcp_server", "src", "mcp_server", "main.py")) &&
-               File.Exists(Path.Combine(RuntimeRoot, "planner", ".venv", "Scripts", "python.exe")) &&
+               File.Exists(Path.Combine(RuntimeRoot, ".venv", "Scripts", "python.exe")) &&
                File.Exists(Path.Combine(RuntimeRoot, "planner", "src", "planner", "app.py")) &&
                File.Exists(Path.Combine(RuntimeRoot, "planner", "config.toml"));
     }
