@@ -229,7 +229,8 @@ public sealed partial class DoubaoAgentToolService : IDisposable
                 CheckedAt = controller.CheckedAt == DateTimeOffset.MinValue
                     ? DateTimeOffset.Now
                     : controller.CheckedAt.ToLocalTime(),
-                IsRefreshing = false
+                IsRefreshing = false,
+                RestartExhausted = controller.RestartExhausted
             });
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
@@ -1508,7 +1509,8 @@ public sealed record DoubaoAgentSnapshot(
     DateTimeOffset CheckedAt,
     DoubaoRuntimeSecurityState? Security = null,
     bool IsRefreshing = false,
-    long Revision = 0)
+    long Revision = 0,
+    bool RestartExhausted = false)
 {
     public DoubaoRuntimeSecurityState RuntimeSecurity =>
         Security ?? DoubaoRuntimeSecurityState.Unverified();

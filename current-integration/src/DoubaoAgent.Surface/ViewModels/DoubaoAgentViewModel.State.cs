@@ -42,7 +42,7 @@ public sealed partial class DoubaoAgentViewModel
             nameof(RuntimeInstalled), nameof(SecretConfigured), nameof(IsRefreshing), nameof(HasServiceError),
             nameof(ShowRuntimeMissingWarning), nameof(ShowSecretMissingWarning),
             nameof(AllServicesOnline), nameof(AnyServiceOnline),
-            nameof(RuntimeSecurity), nameof(HasUnsafeListeners), nameof(HasOwnedProcesses), nameof(CanEnableAutoStart),
+            nameof(RuntimeSecurity), nameof(HasUnsafeListeners), nameof(HasOwnedProcesses), nameof(RestartExhausted), nameof(CanEnableAutoStart),
             nameof(ToolServerOnline), nameof(PlannerOnline), nameof(McpServerOnline), nameof(ArkApiKeyConfigured),
             nameof(AuthKeyConfigured), nameof(AuthApiKeyConfigured), nameof(ArkApiKeyStatus), nameof(AuthKeyStatus),
             nameof(AuthApiKeyStatus), nameof(HasLogs),

@@ -118,7 +118,8 @@ static void RefreshStatus(DoubaoSecureRuntimeController controller, ControllerSt
         planner.Online,
         mcp,
         root,
-        DateTimeOffset.UtcNow));
+        DateTimeOffset.UtcNow,
+        state.RestartExhausted));
 }
 
 // ---------------------------------------------------------------------------
@@ -144,7 +145,12 @@ static void WatchOwnedProcesses(DoubaoSecureRuntimeController controller, Contro
 
     if (!state.ShouldAttemptRestart())
     {
-        return; // respect backoff window
+        if (state.RestartExhausted)
+        {
+            Trace.WriteLine($"DoubaoAgent.Controller.Service watchdog: restart exhausted after {ControllerState.MaxRestartAttempts} attempts. Manual restart required.");
+            state.RecordFailure("自动重启已耗尽，请手动重启。");
+        }
+        return; // respect backoff window or exhausted
     }
 
     var secret = ResolveSecretFilePath(secretFilePath);
@@ -458,7 +464,8 @@ sealed record ControllerSnapshot(
     bool PlannerOnline,
     bool McpOnline,
     string RuntimeRoot,
-    DateTimeOffset CheckedAt)
+    DateTimeOffset CheckedAt,
+    bool RestartExhausted = false)
 {
     public bool AllServicesOnline => SecuritySafe && ToolOnline && PlannerOnline && McpOnline;
 }
@@ -474,7 +481,12 @@ sealed class ControllerState
     private DateTimeOffset _lastRestartAttempt = DateTimeOffset.MinValue;
     private int _restartAttempts;
     private readonly TimeSpan _restartBackoff = TimeSpan.FromSeconds(30);
-    private const int MaxRestartAttempts = 4;
+    public const int MaxRestartAttempts = 4;
+
+    public bool RestartExhausted
+    {
+        get { lock (_gate) { return _restartAttempts >= MaxRestartAttempts; } }
+    }
 
     public ControllerSnapshot? CurrentSnapshot
     {

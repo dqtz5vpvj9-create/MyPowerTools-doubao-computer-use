@@ -20,7 +20,8 @@ public sealed record DoubaoControllerStatusSnapshot(
     bool PlannerOnline,
     bool McpOnline,
     string RuntimeRoot,
-    DateTimeOffset CheckedAt);
+    DateTimeOffset CheckedAt,
+    bool RestartExhausted = false);
 
 /// <summary>
 /// Runtime controller used by the product Surface. Lifecycle ownership remains in the independent
@@ -244,7 +245,8 @@ public sealed class DoubaoServiceUnitRuntimeController :
             ReadBoolean(data, "plannerOnline"),
             ReadBoolean(data, "mcpOnline"),
             ReadString(data, "runtimeRoot", ""),
-            ReadDateTimeOffset(data, "checkedAt"));
+            ReadDateTimeOffset(data, "checkedAt"),
+            ReadBoolean(data, "restartExhausted"));
     }
 
     private static DoubaoAgentOperationResult ParseOperation(JsonElement data) =>

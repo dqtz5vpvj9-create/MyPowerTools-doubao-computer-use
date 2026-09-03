@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Net.Http;
 using Avalonia.Threading;
 using DoubaoAgent.Surface.Services;
 
@@ -39,7 +40,7 @@ public sealed partial class DoubaoAgentViewModel
         catch (Exception ex)
         {
             HasActionError = true;
-            ActionMessage = $"刷新失败：{ex.Message}";
+            ActionMessage = $"刷新失败：{LocalizeError(ex)}";
         }
     }
 
@@ -86,7 +87,7 @@ public sealed partial class DoubaoAgentViewModel
         catch (Exception ex)
         {
             HasActionError = true;
-            ActionMessage = $"刷新失败：{ex.Message}";
+            ActionMessage = $"刷新失败：{LocalizeError(ex)}";
         }
     }
 
@@ -98,7 +99,8 @@ public sealed partial class DoubaoAgentViewModel
         ActionMessage = "正在更新运行时…";
         try
         {
-            var result = await operation(CancellationToken.None);
+            var cancellationToken = _activationCancellation?.Token ?? CancellationToken.None;
+            var result = await operation(cancellationToken);
             HasActionError = !result.Success;
             ActionMessage = result.Message;
             _lastOperationDiagnostic = result.TechnicalDetails;
@@ -107,7 +109,7 @@ public sealed partial class DoubaoAgentViewModel
         catch (Exception ex)
         {
             HasActionError = true;
-            ActionMessage = $"运行时操作失败：{ex.Message}";
+            ActionMessage = $"运行时操作失败：{LocalizeError(ex)}";
         }
         finally
         {
@@ -162,8 +164,8 @@ public sealed partial class DoubaoAgentViewModel
         catch (Exception ex)
         {
             HasActionError = true;
-            ActionMessage = $"任务失败：{ex.Message}";
-            await AddTraceOnUiAsync(CreateMessageEvent("error", "任务执行失败", ex.Message, isError: true));
+            ActionMessage = $"任务失败：{LocalizeError(ex)}";
+            await AddTraceOnUiAsync(CreateMessageEvent("error", "任务执行失败", LocalizeError(ex), isError: true));
         }
         finally
         {
@@ -178,7 +180,7 @@ public sealed partial class DoubaoAgentViewModel
             }
             catch (Exception ex)
             {
-                _lastOperationDiagnostic = $"任务结束后刷新状态失败：{ex.Message}";
+                _lastOperationDiagnostic = $"任务结束后刷新状态失败：{LocalizeError(ex)}";
                 OnPropertyChanged(nameof(DiagnosticText));
             }
         }
@@ -210,7 +212,8 @@ public sealed partial class DoubaoAgentViewModel
         HasActionError = false;
         try
         {
-            var result = await operation(CancellationToken.None);
+            var cancellationToken = _activationCancellation?.Token ?? CancellationToken.None;
+            var result = await operation(cancellationToken);
             HasActionError = !result.Success;
             ActionMessage = result.Message;
             _lastOperationDiagnostic = result.TechnicalDetails;
@@ -220,7 +223,7 @@ public sealed partial class DoubaoAgentViewModel
         catch (Exception ex)
         {
             HasActionError = true;
-            ActionMessage = $"定位标记操作失败：{ex.Message}";
+            ActionMessage = $"定位标记操作失败：{LocalizeError(ex)}";
         }
         finally
         {
@@ -282,7 +285,7 @@ public sealed partial class DoubaoAgentViewModel
         catch (Exception ex)
         {
             HasSettingsError = true;
-            SettingsMessage = $"保存配置失败：{ex.Message}";
+            SettingsMessage = $"保存配置失败：{LocalizeError(ex)}";
         }
         finally
         {
@@ -306,7 +309,7 @@ public sealed partial class DoubaoAgentViewModel
         catch (Exception ex)
         {
             HasSettingsError = true;
-            SettingsMessage = $"连接测试失败：{ex.Message}";
+            SettingsMessage = $"连接测试失败：{LocalizeError(ex)}";
         }
         finally
         {
@@ -375,4 +378,12 @@ public sealed partial class DoubaoAgentViewModel
     {
         TaskDurationText = $"{Math.Round(_taskStopwatch?.Elapsed.TotalSeconds ?? 0):0} 秒";
     }
+
+    private static string LocalizeError(Exception ex) => ex switch
+    {
+        HttpRequestException => "无法连接到运行时服务，请检查服务是否已启动。",
+        TimeoutException or TaskCanceledException => "操作超时，请重试。",
+        _ when ex.Message.Contains("refused") => "运行时服务拒绝连接。",
+        _ => ex.Message
+    };
 }
