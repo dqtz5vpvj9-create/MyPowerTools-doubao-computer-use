@@ -130,6 +130,7 @@ public sealed partial class DoubaoAgentViewModel
             return;
         }
 
+        var request = new DoubaoAgentTaskRequest(Instruction, SelectedModel.Name, SystemPrompt);
         if (!AllServicesOnline && !await EnsureRuntimeReadyAsync())
         {
             return;
@@ -138,16 +139,17 @@ public sealed partial class DoubaoAgentViewModel
         _taskCancellation?.Dispose();
         _taskCancellation = new CancellationTokenSource();
         ClearTraceCore();
+        _runReport.Reset(request, DateTimeOffset.Now);
         IsTaskRunning = true;
         HasActionError = false;
         ActionMessage = "豆包正在观察屏幕并执行任务…";
         _taskStopwatch = Stopwatch.StartNew();
-        AddTrace(CreateMessageEvent("request", "已提交任务", Instruction.Trim()));
+        AddTrace(CreateMessageEvent("request", "已提交任务", request.Instruction.Trim()));
 
         try
         {
             await _service.RunTaskAsync(
-                new DoubaoAgentTaskRequest(Instruction, SelectedModel.Name, SystemPrompt),
+                request,
                 AddTraceOnUiAsync,
                 _taskCancellation.Token);
             ActionMessage = "任务流已完成";
@@ -330,6 +332,8 @@ public sealed partial class DoubaoAgentViewModel
 
     private void AddTrace(DoubaoAgentTaskEvent taskEvent)
     {
+        _runReport.Add(taskEvent);
+        OnPropertyChanged(nameof(HasRunReport));
         var item = new DoubaoAgentTraceItemViewModel(taskEvent);
         Trace.Insert(0, item);
         SelectedTrace ??= item;
@@ -363,6 +367,9 @@ public sealed partial class DoubaoAgentViewModel
 
     private void ClearTraceCore()
     {
+        _runReport.Reset();
+        SetRunReportFeedback("");
+        OnPropertyChanged(nameof(HasRunReport));
         Trace.Clear();
         SelectedTrace = null;
         LatestScreenshot = null;
