@@ -1,5 +1,6 @@
 using System.Text;
 using Avalonia;
+using Avalonia.Input.Platform;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using Avalonia.Controls;
@@ -29,8 +30,8 @@ public sealed partial class DoubaoAgentView : UserControl
         {
             var clipboard = TopLevel.GetTopLevel(this)?.Clipboard;
             if (clipboard is null) throw new InvalidOperationException("剪贴板暂不可用");
-            await clipboard.SetTextAsync(report);
-            vm.SetRunReportFeedback("任务记录已复制（包含当前已收到的全部文本事件，最多 4 MiB 字符）。");
+            await ClipboardExtensions.SetTextAsync(clipboard, report);
+            vm.SetRunReportFeedback("任务记录已复制（事件文本最多保留约 419 万字符；超出部分会标注截断）。");
         }
         catch (Exception ex) { vm.SetRunReportFeedback($"复制失败：{ex.Message}"); }
     }
