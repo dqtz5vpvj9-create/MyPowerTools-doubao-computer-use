@@ -1,5 +1,7 @@
+using System.Windows.Input;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
 using DoubaoAgent.Surface.ViewModels;
 
 namespace DoubaoAgent.Surface.Views;
@@ -10,12 +12,40 @@ public sealed partial class DoubaoAgentView : UserControl
     {
         InitializeComponent();
         SizeChanged += (_, eventArgs) => UpdateResponsiveLayout(eventArgs.NewSize.Width);
+        KeyDown += OnViewKeyDown;
         Loaded += (_, _) =>
         {
             UpdateResponsiveLayout(Bounds.Width);
             (DataContext as DoubaoAgentViewModel)?.Activate();
         };
         DetachedFromVisualTree += (_, _) => (DataContext as IDisposable)?.Dispose();
+    }
+
+    private void OnViewKeyDown(object? sender, KeyEventArgs eventArgs)
+    {
+        if (eventArgs.Handled || DataContext is not DoubaoAgentViewModel viewModel)
+        {
+            return;
+        }
+
+        var handled = DoubaoAgentKeyboardShortcut.Resolve(eventArgs.Key, eventArgs.KeyModifiers) switch
+        {
+            DoubaoAgentKeyboardAction.RunTask => TryExecute(viewModel.RunTaskCommand),
+            DoubaoAgentKeyboardAction.CancelTask => TryExecute(viewModel.StopTaskCommand),
+            _ => false
+        };
+        eventArgs.Handled = handled;
+    }
+
+    private static bool TryExecute(ICommand command)
+    {
+        if (!command.CanExecute(null))
+        {
+            return false;
+        }
+
+        command.Execute(null);
+        return true;
     }
 
     private void UpdateResponsiveLayout(double width)
