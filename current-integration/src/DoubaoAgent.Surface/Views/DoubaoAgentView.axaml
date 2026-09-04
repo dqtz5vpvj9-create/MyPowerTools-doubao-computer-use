@@ -281,7 +281,12 @@
                 <controls:MptButton Content="清空记录"
                                     Margin="{DynamicResource MptGapBottomS}"
                                     Command="{Binding ClearTraceCommand}" />
+                <controls:MptButton Content="复制任务记录" IsEnabled="{Binding HasRunReport}"
+                                    Margin="{DynamicResource MptWrapItemCompactMargin}" Click="OnCopyReportClick" />
+                <controls:MptButton Content="导出任务记录…" IsEnabled="{Binding HasRunReport}"
+                                    Margin="{DynamicResource MptWrapItemCompactMargin}" Click="OnExportReportClick" />
               </WrapPanel>
+              <TextBlock Text="{Binding RunReportFeedback}" Classes="MptMeta" TextWrapping="Wrap" />
             </StackPanel>
           </Border>
 

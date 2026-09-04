@@ -13,6 +13,8 @@ public sealed partial class DoubaoAgentViewModel : MyPowerTools.AvaloniaSdk.Tool
 {
     public const int MaxTraceItems = 64;
     private readonly DoubaoAgentToolService _service;
+    private readonly DoubaoRunReport _runReport = new();
+    private string _runReportFeedback = "";
     private readonly bool _ownsService;
     private DoubaoAgentSnapshot _snapshot;
     private CancellationTokenSource? _taskCancellation;
@@ -170,6 +172,13 @@ public sealed partial class DoubaoAgentViewModel : MyPowerTools.AvaloniaSdk.Tool
     public string AuthKeyStatus => AuthKeyConfigured ? "已配置" : "未配置";
     public string AuthApiKeyStatus => AuthApiKeyConfigured ? "已配置" : "未配置";
     public bool HasTrace => Trace.Count > 0;
+    public bool HasRunReport => _runReport.EventCount > 0;
+    public string RunReportFeedback => _runReportFeedback;
+    public string CreateRunReport() => _runReport.CreateText(IsTaskRunning ? "Running" : ActionMessage, TaskDurationText);
+    public void SetRunReportFeedback(string message)
+    {
+        SetProperty(ref _runReportFeedback, message, nameof(RunReportFeedback));
+    }
     public bool HasLogs => Logs.Count > 0;
     public bool HasRuntimeProcesses => RuntimeProcesses.Count > 0;
     public bool HasLatestScreenshot => LatestScreenshot is not null;
