@@ -9,12 +9,166 @@
   "type": "dotnet-surface",
   "primaryRouteId": "services",
   "routes": [
-    { "routeId": "services", "surfaceId": "doubao-agent.services", "title": "电脑任务", "icon": "route.services", "surface": { "kind": "dotnet", "assembly": "surface/DoubaoAgent.Surface.dll", "type": "DoubaoAgent.Surface.DoubaoAgentSurfaceFactory" } }
+    {
+      "routeId": "services",
+      "surfaceId": "doubao-agent.services",
+      "title": "电脑任务",
+      "icon": "route.services",
+      "surface": {
+        "kind": "dotnet",
+        "assembly": "surface/DoubaoAgent.Surface.dll",
+        "type": "DoubaoAgent.Surface.DoubaoAgentSurfaceFactory"
+      }
+    }
   ],
   "homeCard": {
     "summary": "输入任务，让豆包视觉代理观察屏幕并执行操作。",
     "primaryActionLabel": "打开电脑任务",
     "statusBinding": "module.status",
     "order": 60
-  }
+  },
+  "shortcuts": [
+    {
+      "id": "doubao-agent.ui.refresh",
+      "title": "Refresh",
+      "context": "",
+      "allowInTextInput": false,
+      "bindings": [
+        {
+          "gesture": "F5",
+          "platform": "all"
+        }
+      ]
+    },
+    {
+      "id": "doubao-agent.ui.start-runtime",
+      "title": "Start Runtime",
+      "context": "",
+      "allowInTextInput": false,
+      "bindings": []
+    },
+    {
+      "id": "doubao-agent.ui.stop-runtime",
+      "title": "Stop Runtime",
+      "context": "",
+      "allowInTextInput": false,
+      "bindings": []
+    },
+    {
+      "id": "doubao-agent.ui.restart-runtime",
+      "title": "Restart Runtime",
+      "context": "",
+      "allowInTextInput": false,
+      "bindings": []
+    },
+    {
+      "id": "doubao-agent.ui.run-task",
+      "title": "Run Task",
+      "context": "",
+      "allowInTextInput": true,
+      "bindings": [
+        {
+          "gesture": "Ctrl+Enter",
+          "platform": "windows"
+        },
+        {
+          "gesture": "Ctrl+Enter",
+          "platform": "linux"
+        },
+        {
+          "gesture": "Cmd+Enter",
+          "platform": "macos"
+        }
+      ]
+    },
+    {
+      "id": "doubao-agent.ui.stop-task",
+      "title": "Stop Task",
+      "context": "",
+      "allowInTextInput": true,
+      "bindings": [
+        {
+          "gesture": "Ctrl+Escape",
+          "platform": "windows"
+        },
+        {
+          "gesture": "Ctrl+Escape",
+          "platform": "linux"
+        },
+        {
+          "gesture": "Cmd+Escape",
+          "platform": "macos"
+        }
+      ]
+    },
+    {
+      "id": "doubao-agent.ui.clear-trace",
+      "title": "Clear Trace",
+      "context": "",
+      "allowInTextInput": false,
+      "bindings": []
+    },
+    {
+      "id": "doubao-agent.ui.show-overlay",
+      "title": "Show Overlay",
+      "context": "",
+      "allowInTextInput": false,
+      "bindings": []
+    },
+    {
+      "id": "doubao-agent.ui.hide-overlay",
+      "title": "Hide Overlay",
+      "context": "",
+      "allowInTextInput": false,
+      "bindings": []
+    },
+    {
+      "id": "doubao-agent.ui.overlay-self-test",
+      "title": "Overlay Self Test",
+      "context": "",
+      "allowInTextInput": false,
+      "bindings": []
+    },
+    {
+      "id": "doubao-agent.ui.save-configuration",
+      "title": "Save Configuration",
+      "context": "",
+      "allowInTextInput": true,
+      "bindings": [
+        {
+          "gesture": "Ctrl+S",
+          "platform": "windows"
+        },
+        {
+          "gesture": "Ctrl+S",
+          "platform": "linux"
+        },
+        {
+          "gesture": "Cmd+S",
+          "platform": "macos"
+        }
+      ]
+    },
+    {
+      "id": "doubao-agent.ui.test-configuration",
+      "title": "Test Configuration",
+      "context": "",
+      "allowInTextInput": false,
+      "bindings": []
+    },
+    {
+      "id": "doubao-agent.ui.copy-report",
+      "title": "Copy task report",
+      "context": "",
+      "allowInTextInput": false,
+      "bindings": []
+    },
+    {
+      "id": "doubao-agent.ui.export-report",
+      "title": "Export task report",
+      "context": "",
+      "allowInTextInput": false,
+      "bindings": []
+    }
+  ]
 }

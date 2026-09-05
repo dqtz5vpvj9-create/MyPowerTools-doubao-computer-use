@@ -1,4 +1,5 @@
 <UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:shortcuts="using:MyPowerTools.AvaloniaSdk"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:controls="using:MyPowerTools.UI.Controls"
              xmlns:services="using:DoubaoAgent.Surface.Services"
@@ -48,7 +49,7 @@
         </Grid>
         <controls:MptButton Grid.Column="1"
                             Content="刷新"
-                            Command="{Binding RefreshCommand}"
+                            Command="{Binding RefreshCommand}" shortcuts:MptShortcutHint.CommandId="doubao-agent.ui.refresh"
                             VerticalAlignment="Center" />
       </Grid>
 
@@ -88,13 +89,13 @@
             <controls:MptButton Classes="MptPrimaryButton"
                                 Content="启动"
                                 Margin="{DynamicResource MptWrapItemCompactMargin}"
-                                Command="{Binding StartRuntimeCommand}" />
+                                Command="{Binding StartRuntimeCommand}" shortcuts:MptShortcutHint.CommandId="doubao-agent.ui.start-runtime" />
             <controls:MptButton Content="停止"
                                 Margin="{DynamicResource MptWrapItemCompactMargin}"
-                                Command="{Binding StopRuntimeCommand}" />
+                                Command="{Binding StopRuntimeCommand}" shortcuts:MptShortcutHint.CommandId="doubao-agent.ui.stop-runtime" />
             <controls:MptButton Content="重新启动"
                                 Margin="{DynamicResource MptGapBottomS}"
-                                Command="{Binding RestartRuntimeCommand}" />
+                                Command="{Binding RestartRuntimeCommand}" shortcuts:MptShortcutHint.CommandId="doubao-agent.ui.restart-runtime" />
           </WrapPanel>
         </Grid>
       </Border>
@@ -214,10 +215,10 @@
                   <controls:MptButton Classes="MptPrimaryButton"
                                       Content="保存并重启"
                                       Margin="{DynamicResource MptWrapItemCompactMargin}"
-                                      Command="{Binding SaveConfigurationCommand}" />
+                                      Command="{Binding SaveConfigurationCommand}" shortcuts:MptShortcutHint.CommandId="doubao-agent.ui.save-configuration" />
                   <controls:MptButton Content="测试连接"
                                       Margin="{DynamicResource MptGapBottomS}"
-                                      Command="{Binding TestConfigurationCommand}" />
+                                      Command="{Binding TestConfigurationCommand}" shortcuts:MptShortcutHint.CommandId="doubao-agent.ui.test-configuration" />
                 </WrapPanel>
               </StackPanel>
             </Expander>
@@ -274,17 +275,17 @@
                 <controls:MptButton Classes="MptPrimaryButton"
                                     Content="运行"
                                     Margin="{DynamicResource MptWrapItemCompactMargin}"
-                                    Command="{Binding RunTaskCommand}" />
+                                    Command="{Binding RunTaskCommand}" shortcuts:MptShortcutHint.CommandId="doubao-agent.ui.run-task" />
                 <controls:MptButton Content="停止任务"
                                     Margin="{DynamicResource MptWrapItemCompactMargin}"
-                                    Command="{Binding StopTaskCommand}" />
+                                    Command="{Binding StopTaskCommand}" shortcuts:MptShortcutHint.CommandId="doubao-agent.ui.stop-task" />
                 <controls:MptButton Content="清空记录"
                                     Margin="{DynamicResource MptGapBottomS}"
-                                    Command="{Binding ClearTraceCommand}" />
+                                    Command="{Binding ClearTraceCommand}" shortcuts:MptShortcutHint.CommandId="doubao-agent.ui.clear-trace" />
                 <controls:MptButton Content="复制任务记录" IsEnabled="{Binding HasRunReport}"
-                                    Margin="{DynamicResource MptWrapItemCompactMargin}" Click="OnCopyReportClick" />
+                                    Margin="{DynamicResource MptWrapItemCompactMargin}" Click="OnCopyReportClick" shortcuts:MptShortcutHint.CommandId="doubao-agent.ui.copy-report" />
                 <controls:MptButton Content="导出任务记录…" IsEnabled="{Binding HasRunReport}"
-                                    Margin="{DynamicResource MptWrapItemCompactMargin}" Click="OnExportReportClick" />
+                                    Margin="{DynamicResource MptWrapItemCompactMargin}" Click="OnExportReportClick" shortcuts:MptShortcutHint.CommandId="doubao-agent.ui.export-report" />
               </WrapPanel>
               <TextBlock Text="{Binding RunReportFeedback}" Classes="MptMeta" TextWrapping="Wrap" />
             </StackPanel>
@@ -385,13 +386,13 @@
                   <WrapPanel Orientation="Horizontal">
                     <controls:MptButton Content="显示"
                                         Margin="{DynamicResource MptWrapItemCompactMargin}"
-                                        Command="{Binding ShowOverlayCommand}" />
+                                        Command="{Binding ShowOverlayCommand}" shortcuts:MptShortcutHint.CommandId="doubao-agent.ui.show-overlay" />
                     <controls:MptButton Content="隐藏"
                                         Margin="{DynamicResource MptWrapItemCompactMargin}"
-                                        Command="{Binding HideOverlayCommand}" />
+                                        Command="{Binding HideOverlayCommand}" shortcuts:MptShortcutHint.CommandId="doubao-agent.ui.hide-overlay" />
                     <controls:MptButton Content="自检"
                                         Margin="{DynamicResource MptGapBottomS}"
-                                        Command="{Binding OverlaySelfTestCommand}" />
+                                        Command="{Binding OverlaySelfTestCommand}" shortcuts:MptShortcutHint.CommandId="doubao-agent.ui.overlay-self-test" />
                   </WrapPanel>
                 </StackPanel>
               </Expander>
