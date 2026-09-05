@@ -22,7 +22,9 @@ public sealed partial class DoubaoAgentView : UserControl
         DetachedFromVisualTree += (_, _) => (DataContext as IDisposable)?.Dispose();
     }
 
-    private async void OnCopyReportClick(object? sender, RoutedEventArgs e)
+    private async void OnCopyReportClick(object? sender, RoutedEventArgs e) => await CopyReportAsync();
+
+    private async Task CopyReportAsync()
     {
         if (DataContext is not DoubaoAgentViewModel vm || !vm.HasRunReport) return;
         var report = vm.CreateRunReport();
@@ -36,7 +38,9 @@ public sealed partial class DoubaoAgentView : UserControl
         catch (Exception ex) { vm.SetRunReportFeedback($"复制失败：{ex.Message}"); }
     }
 
-    private async void OnExportReportClick(object? sender, RoutedEventArgs e)
+    private async void OnExportReportClick(object? sender, RoutedEventArgs e) => await ExportReportAsync();
+
+    private async Task ExportReportAsync()
     {
         if (DataContext is not DoubaoAgentViewModel vm || !vm.HasRunReport) return;
         var report = vm.CreateRunReport();
