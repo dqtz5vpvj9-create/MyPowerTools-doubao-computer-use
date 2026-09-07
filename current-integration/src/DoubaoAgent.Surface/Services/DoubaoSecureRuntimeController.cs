@@ -765,6 +765,25 @@ public sealed class DoubaoSecureRuntimeController : IDoubaoSecureRuntimeControll
         return started.Where(identity => remainingProcessIds.Contains(identity.ProcessId)).ToArray();
     }
 
+    /// <summary>
+    /// The target's main module path, waiting out the window between process creation and the
+    /// point the loader has published its module list. Returns empty when the image genuinely
+    /// cannot be read — a protected process, or a bitness the caller cannot inspect.
+    /// </summary>
+    private static async Task<string?> ReadImagePathAsync(Process process, CancellationToken cancellationToken)
+    {
+        var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(2);
+        while (true)
+        {
+            var image = process.MainModule?.FileName;
+            if (!string.IsNullOrEmpty(image)) return image;
+            if (process.HasExited || DateTime.UtcNow >= deadline) return null;
+
+            await Task.Delay(25, cancellationToken);
+            process.Refresh();
+        }
+    }
+
     private static async Task<IdentityValidation> ValidateIdentityAsync(
         OwnedProcessIdentity identity,
         CancellationToken cancellationToken)
@@ -790,7 +809,22 @@ public sealed class DoubaoSecureRuntimeController : IDoubaoSecureRuntimeControll
             DateTimeOffset actualStart;
             try
             {
-                actualPath = Path.GetFullPath(process.MainModule?.FileName ?? "");
+                // A process does not publish its module list until it has initialised, so the image
+                // path reads back empty for the first few tens of milliseconds of its life —
+                // measured at under 50ms for powershell.exe, but it is the target's start-up cost,
+                // not ours. Treating that as a failed identity check would refuse to stop a process
+                // we legitimately own purely because we asked too early, which is what happened
+                // whenever the caller was fast enough to inspect a freshly started runtime. The
+                // "" fallback that used to stand here also reached Path.GetFullPath, which rejects
+                // an empty path with ArgumentException — not in the filter below, so it escaped
+                // StopAsync entirely rather than failing validation.
+                var actualImage = await ReadImagePathAsync(process, cancellationToken);
+                if (string.IsNullOrEmpty(actualImage))
+                {
+                    return new IdentityValidation(IdentityValidationState.Invalid, "无法读取进程的可执行文件路径。");
+                }
+
+                actualPath = Path.GetFullPath(actualImage);
                 actualStart = process.StartTime.ToUniversalTime();
             }
             catch (Exception ex) when (ex is InvalidOperationException or Win32Exception)
