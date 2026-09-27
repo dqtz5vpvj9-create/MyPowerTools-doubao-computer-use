@@ -1,5 +1,6 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:shortcuts="using:MyPowerTools.AvaloniaSdk"
+             xmlns:adaptive="using:MyPowerTools.AvaloniaSdk"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:controls="using:MyPowerTools.UI.Controls"
              xmlns:services="using:DoubaoAgent.Surface.Services"
@@ -23,7 +24,7 @@
     <StackPanel MaxWidth="1480"
                 HorizontalAlignment="Stretch"
                 Spacing="{DynamicResource MptSpacingL}">
-      <Grid ColumnDefinitions="*,Auto"
+      <Grid adaptive:MptAdaptiveLayout.StackBelow="600" ColumnDefinitions="*,Auto"
             ColumnSpacing="16">
         <Grid ColumnDefinitions="46,*"
               ColumnSpacing="12">
@@ -55,10 +56,10 @@
 
       <Border Classes="MptCard"
               Padding="{DynamicResource MptCompactPadding}">
-        <Grid ColumnDefinitions="Auto,*,Auto"
+        <Grid adaptive:MptAdaptiveLayout.StackBelow="600" ColumnDefinitions="Auto,*,Auto"
               ColumnSpacing="14"
               MinHeight="40">
-          <StackPanel Orientation="Horizontal"
+          <StackPanel adaptive:MptAdaptiveLayout.StackBelow="480" Orientation="Horizontal"
                       Spacing="{DynamicResource MptSpacingS}"
                       VerticalAlignment="Center">
             <TextBlock Text="{Binding RuntimeStatusText}"
@@ -168,7 +169,7 @@
                            TextWrapping="Wrap" />
 
                 <StackPanel Spacing="{DynamicResource MptSpacingXs}">
-                  <Grid ColumnDefinitions="*,Auto">
+                  <Grid adaptive:MptAdaptiveLayout.StackBelow="600" ColumnDefinitions="*,Auto">
                     <TextBlock Classes="MptMeta" Text="ARK_API_KEY · 模型服务" />
                     <TextBlock Grid.Column="1" Classes="MptMeta" Text="{Binding ArkApiKeyStatus}" />
                   </Grid>
@@ -179,7 +180,7 @@
                 </StackPanel>
 
                 <StackPanel Spacing="{DynamicResource MptSpacingXs}">
-                  <Grid ColumnDefinitions="*,Auto">
+                  <Grid adaptive:MptAdaptiveLayout.StackBelow="600" ColumnDefinitions="*,Auto">
                     <TextBlock Classes="MptMeta" Text="AUTH_KEY · Tool Server" />
                     <TextBlock Grid.Column="1" Classes="MptMeta" Text="{Binding AuthKeyStatus}" />
                   </Grid>
@@ -190,7 +191,7 @@
                 </StackPanel>
 
                 <StackPanel Spacing="{DynamicResource MptSpacingXs}">
-                  <Grid ColumnDefinitions="*,Auto">
+                  <Grid adaptive:MptAdaptiveLayout.StackBelow="600" ColumnDefinitions="*,Auto">
                     <TextBlock Classes="MptMeta" Text="AUTH_API_KEY · MCP Server" />
                     <TextBlock Grid.Column="1" Classes="MptMeta" Text="{Binding AuthApiKeyStatus}" />
                   </Grid>
@@ -293,7 +294,7 @@
 
           <Border Classes="MptCard">
             <StackPanel Spacing="{DynamicResource MptSpacingM}">
-              <Grid ColumnDefinitions="*,Auto">
+              <Grid adaptive:MptAdaptiveLayout.StackBelow="600" ColumnDefinitions="*,Auto">
                 <TextBlock Classes="MptSectionTitle"
                            Text="本地服务" />
                 <TextBlock Grid.Column="1"
@@ -356,7 +357,7 @@
 
               <Expander Header="屏幕标记调试">
                 <StackPanel Spacing="{DynamicResource MptSpacingM}">
-                  <Grid ColumnDefinitions="*,*"
+                  <Grid adaptive:MptAdaptiveLayout.StackBelow="600" ColumnDefinitions="*,*"
                         RowDefinitions="Auto,Auto"
                         ColumnSpacing="10"
                         RowSpacing="10">
@@ -403,7 +404,7 @@
         <StackPanel x:Name="ActivityPanel"
                     Grid.Column="1"
                     Spacing="{DynamicResource MptSpacingL}">
-          <Grid ColumnDefinitions="*,*,*,*"
+          <Grid adaptive:MptAdaptiveLayout.StackBelow="600" ColumnDefinitions="*,*,*,*"
                 ColumnSpacing="10">
             <Border Classes="MptMetricTile MptCard" MinHeight="82">
               <StackPanel Spacing="{DynamicResource MptSpacingXs}">
@@ -434,7 +435,7 @@
           <Border Classes="MptCard">
             <Grid RowDefinitions="Auto,280"
                   RowSpacing="12">
-              <Grid ColumnDefinitions="*,Auto">
+              <Grid adaptive:MptAdaptiveLayout.StackBelow="600" ColumnDefinitions="*,Auto">
                 <TextBlock Classes="MptSectionTitle"
                            Text="截图预览" />
                 <TextBlock Grid.Column="1"
@@ -478,7 +479,7 @@
                     VerticalAlignment="Stretch">
               <Grid RowDefinitions="Auto,380"
                     RowSpacing="12">
-                <Grid ColumnDefinitions="*,Auto">
+                <Grid adaptive:MptAdaptiveLayout.StackBelow="600" ColumnDefinitions="*,Auto">
                   <TextBlock Classes="MptSectionTitle"
                              Text="运行记录" />
                   <TextBlock Grid.Column="1"
@@ -587,7 +588,7 @@
                           IsVisible="{Binding HasRuntimeProcesses}">
               <ItemsControl.ItemTemplate>
                 <DataTemplate x:DataType="services:DoubaoAgentRuntimeProcess">
-                  <Grid ColumnDefinitions="*,110,110,180"
+                  <Grid adaptive:MptAdaptiveLayout.ColumnLabels="进程|PID|端口|状态" adaptive:MptAdaptiveLayout.StackBelow="600" ColumnDefinitions="*,110,110,180"
                         ColumnSpacing="12"
                         Margin="{DynamicResource MptVerticalXsMargin}">
                     <TextBlock Text="{Binding DisplayName}"
@@ -616,7 +617,7 @@
                           IsVisible="{Binding HasLogs}">
               <ItemsControl.ItemTemplate>
                 <DataTemplate x:DataType="services:DoubaoAgentLogFile">
-                  <Grid ColumnDefinitions="*,100,130"
+                  <Grid adaptive:MptAdaptiveLayout.ColumnLabels="日志文件|大小|更新时间" adaptive:MptAdaptiveLayout.StackBelow="600" ColumnDefinitions="*,100,130"
                         ColumnSpacing="12"
                         Margin="{DynamicResource MptVerticalXsMargin}">
                     <TextBlock Text="{Binding Name}"

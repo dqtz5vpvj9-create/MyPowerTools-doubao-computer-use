@@ -1,3 +1,4 @@
+using Avalonia.Threading;
 using System.Text;
 using Avalonia;
 using Avalonia.Input.Platform;
@@ -13,7 +14,7 @@ public sealed partial class DoubaoAgentView : UserControl
     public DoubaoAgentView()
     {
         InitializeComponent();
-        SizeChanged += (_, eventArgs) => UpdateResponsiveLayout(eventArgs.NewSize.Width);
+        SizeChanged += (_, _) => Dispatcher.UIThread.Post(() => UpdateResponsiveLayout(Bounds.Width), DispatcherPriority.Loaded);
         Loaded += (_, _) =>
         {
             UpdateResponsiveLayout(Bounds.Width);
@@ -66,8 +67,12 @@ public sealed partial class DoubaoAgentView : UserControl
         catch (Exception ex) { vm.SetRunReportFeedback($"导出失败：{ex.Message}"); }
     }
 
+    private double _lastResponsiveWidth = double.NaN;
+
     private void UpdateResponsiveLayout(double width)
     {
+        if (width <= 0 || width == _lastResponsiveWidth) return;
+        _lastResponsiveWidth = width;
         if (width <= 0)
         {
             return;
