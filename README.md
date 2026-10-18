@@ -5,7 +5,7 @@ This repository contains the `doubao-computer-use` tool source and its current
 MyPowerTools adapter. Its local submodule origin is:
 
 ```text
-file:///C:/Users/lixinrui/repo/MyPowerTools.ToolRepos/doubao-computer-use
+https://github.com/dqtz5vpvj9-create/MyPowerTools-doubao-computer-use
 ```
 
 ## Repository layout
@@ -64,3 +64,9 @@ git config -f .gitmodules submodule.tools/doubao-computer-use.url <remote-url>
 git submodule sync -- tools/doubao-computer-use
 git add .gitmodules
 ```
+
+## Historical integration snapshots
+
+The superseded Shell UI snapshots now live in Git history rather than the current source tree.
+See [the exact file inventory and recovery commands](current-integration/ARCHIVED-SNAPSHOTS.md).
+Original product source and active build/package inputs remain in place.

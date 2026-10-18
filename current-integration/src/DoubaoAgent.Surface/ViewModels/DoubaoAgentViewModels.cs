@@ -13,6 +13,8 @@ public sealed partial class DoubaoAgentViewModel : MyPowerTools.AvaloniaSdk.Tool
 {
     public const int MaxTraceItems = 64;
     private readonly DoubaoAgentToolService _service;
+    private readonly DoubaoRunReport _runReport = new();
+    private string _runReportFeedback = "";
     private readonly bool _ownsService;
     private DoubaoAgentSnapshot _snapshot;
     private CancellationTokenSource? _taskCancellation;
@@ -158,6 +160,7 @@ public sealed partial class DoubaoAgentViewModel : MyPowerTools.AvaloniaSdk.Tool
     public DoubaoRuntimeSecurityState RuntimeSecurity => _snapshot.RuntimeSecurity;
     public bool HasUnsafeListeners => !IsRefreshing && !RuntimeSecurity.IsSafe;
     public bool HasOwnedProcesses => _snapshot.HasOwnedProcesses;
+    public bool RestartExhausted => _snapshot.RestartExhausted;
     public bool CanEnableAutoStart => RuntimeSecurity.IsSafe;
     public bool ToolServerOnline => Services.FirstOrDefault(service => service.Id == "tool")?.IsOnline ?? false;
     public bool PlannerOnline => Services.FirstOrDefault(service => service.Id == "planner")?.IsOnline ?? false;
@@ -169,6 +172,13 @@ public sealed partial class DoubaoAgentViewModel : MyPowerTools.AvaloniaSdk.Tool
     public string AuthKeyStatus => AuthKeyConfigured ? "已配置" : "未配置";
     public string AuthApiKeyStatus => AuthApiKeyConfigured ? "已配置" : "未配置";
     public bool HasTrace => Trace.Count > 0;
+    public bool HasRunReport => _runReport.EventCount > 0;
+    public string RunReportFeedback => _runReportFeedback;
+    public string CreateRunReport() => _runReport.CreateText(IsTaskRunning ? "Running" : ActionMessage, TaskDurationText);
+    public void SetRunReportFeedback(string message)
+    {
+        SetProperty(ref _runReportFeedback, message, nameof(RunReportFeedback));
+    }
     public bool HasLogs => Logs.Count > 0;
     public bool HasRuntimeProcesses => RuntimeProcesses.Count > 0;
     public bool HasLatestScreenshot => LatestScreenshot is not null;
@@ -188,6 +198,8 @@ public sealed partial class DoubaoAgentViewModel : MyPowerTools.AvaloniaSdk.Tool
             ? "可以执行任务"
             : AllServicesOnline
                 ? "服务在线，等待密钥"
+            : RestartExhausted
+                ? "自动重启已耗尽"
             : AnyServiceOnline
                 ? "部分服务异常"
                 : "服务已停止";
@@ -201,6 +213,8 @@ public sealed partial class DoubaoAgentViewModel : MyPowerTools.AvaloniaSdk.Tool
             ? "运行时已就绪，请先配置 ARK_API_KEY。"
             : AllServicesOnline
                 ? "Planner、Tool Server 与 MCP Server 均已连接。"
+                : RestartExhausted
+                    ? "自动重启已耗尽，请手动重启。"
                 : AnyServiceOnline
                     ? "当前服务状态不完整，可重新启动整套运行时。"
                     : "启动运行时后即可提交电脑操作任务。";

@@ -229,7 +229,8 @@ public sealed partial class DoubaoAgentToolService : IDisposable
                 CheckedAt = controller.CheckedAt == DateTimeOffset.MinValue
                     ? DateTimeOffset.Now
                     : controller.CheckedAt.ToLocalTime(),
-                IsRefreshing = false
+                IsRefreshing = false,
+                RestartExhausted = controller.RestartExhausted
             });
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
@@ -774,16 +775,6 @@ public sealed partial class DoubaoAgentToolService : IDisposable
                File.Exists(Path.Combine(RuntimeRoot, "planner", "config.toml"));
     }
 
-    private bool SecretIsConfigured()
-    {
-        if (!string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("ARK_API_KEY")))
-        {
-            return true;
-        }
-
-        return !string.IsNullOrWhiteSpace(ReadEnvironmentValue(_secretFilePath, "ARK_API_KEY"));
-    }
-
     private IReadOnlyList<DoubaoAgentLogFile> ReadLogFiles()
     {
         var logsDirectory = Path.Combine(_dataRoot, "logs");
@@ -1223,19 +1214,6 @@ public sealed partial class DoubaoAgentToolService : IDisposable
         return value.TryGetInt32(out var result) ? result : null;
     }
 
-    private static int? ReadFirstInt(JsonElement element, params string[] names)
-    {
-        foreach (var name in names)
-        {
-            if (ReadInt(element, name) is { } value)
-            {
-                return value;
-            }
-        }
-
-        return null;
-    }
-
     private static DateTimeOffset? ReadDateTimeOffset(JsonElement element, string name)
     {
         var value = ReadString(element, name);
@@ -1508,7 +1486,8 @@ public sealed record DoubaoAgentSnapshot(
     DateTimeOffset CheckedAt,
     DoubaoRuntimeSecurityState? Security = null,
     bool IsRefreshing = false,
-    long Revision = 0)
+    long Revision = 0,
+    bool RestartExhausted = false)
 {
     public DoubaoRuntimeSecurityState RuntimeSecurity =>
         Security ?? DoubaoRuntimeSecurityState.Unverified();
