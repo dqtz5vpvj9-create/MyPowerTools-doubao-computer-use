@@ -775,16 +775,6 @@ public sealed partial class DoubaoAgentToolService : IDisposable
                File.Exists(Path.Combine(RuntimeRoot, "planner", "config.toml"));
     }
 
-    private bool SecretIsConfigured()
-    {
-        if (!string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("ARK_API_KEY")))
-        {
-            return true;
-        }
-
-        return !string.IsNullOrWhiteSpace(ReadEnvironmentValue(_secretFilePath, "ARK_API_KEY"));
-    }
-
     private IReadOnlyList<DoubaoAgentLogFile> ReadLogFiles()
     {
         var logsDirectory = Path.Combine(_dataRoot, "logs");
@@ -1222,19 +1212,6 @@ public sealed partial class DoubaoAgentToolService : IDisposable
             return null;
         }
         return value.TryGetInt32(out var result) ? result : null;
-    }
-
-    private static int? ReadFirstInt(JsonElement element, params string[] names)
-    {
-        foreach (var name in names)
-        {
-            if (ReadInt(element, name) is { } value)
-            {
-                return value;
-            }
-        }
-
-        return null;
     }
 
     private static DateTimeOffset? ReadDateTimeOffset(JsonElement element, string name)
